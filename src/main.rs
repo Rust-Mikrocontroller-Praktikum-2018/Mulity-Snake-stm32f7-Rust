@@ -2,5 +2,5 @@
 
 
 fn main(){
-    println!("Hello Snaker"):
+    println!("Hello Mulity Snaker");
 }
