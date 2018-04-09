@@ -114,7 +114,7 @@ fn main(hw: board::Hardware) -> ! {
     // lcd controller
     // let ltdc_pointer = ltdc as *mut board::ltdc::Ltdc;
     let lcd = lcd::init(ltdc, rcc, &mut gpio);
-    let graphics = graphics::Graphics::new(lcd);
+    let mut graphics = graphics::Graphics::new(lcd);
     // unsafe {
     //     (*ltdc_pointer).l1cacr.update(|r| r.set_consta(255));
     //     (*ltdc_pointer).l2cacr.update(|r| r.set_consta(255));
@@ -123,6 +123,9 @@ fn main(hw: board::Hardware) -> ! {
     /* ETHERNET START */
     
     /* ETHERNET END */
+
+    let pic: &[u8] = include_bytes!("../assets/Test7.bmp");
+    graphics.print_bmp_at(pic,10,270);
 
     gameloop(graphics);
 }
