@@ -236,7 +236,7 @@ impl Game {
             self.move_right();
         }
     }
-}
+
 // /**
 //  * Sets the direction chosen by the user
 //  */
