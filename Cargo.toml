@@ -1,7 +1,7 @@
 [package]
 name = "multi_snake_stm32f7_rust"
 version = "0.1.0"
-authors = ["","","Fabian Wiesner <wiesner.info@gmail.com>"]
+authors = ["","Florian Götz flogoetz1@web.de","Fabian Wiesner <wiesner.info@gmail.com>"]
 
 [dependencies]
 cortex-m = "0.1.4 "
