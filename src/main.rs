@@ -15,7 +15,7 @@ extern crate alloc;
 extern crate r0;
 extern crate smoltcp;
 
-use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock};
+use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock, i2c, touch};
 use stm32f7::ethernet::IP_ADDR;
 use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
 use smoltcp::wire::{IpAddress, IpEndpoint};
@@ -75,6 +75,7 @@ fn main(hw: board::Hardware) -> ! {
         syscfg,
         ethernet_mac,
         ethernet_dma,
+        i2c_3,
         ..
     } = hw;
 
@@ -115,6 +116,12 @@ fn main(hw: board::Hardware) -> ! {
     // let ltdc_pointer = ltdc as *mut board::ltdc::Ltdc;
     let lcd = lcd::init(ltdc, rcc, &mut gpio);
     let graphics = graphics::Graphics::new(lcd);
+
+    i2c::init_pins_and_clocks(rcc, &mut gpio);
+    let mut i2c_3 = i2c::init(i2c_3);
+    let mut touch = touch::check_family_id(&mut i2c_3).unwrap();
+
+
     // unsafe {
     //     (*ltdc_pointer).l1cacr.update(|r| r.set_consta(255));
     //     (*ltdc_pointer).l2cacr.update(|r| r.set_consta(255));
@@ -124,10 +131,10 @@ fn main(hw: board::Hardware) -> ! {
     
     /* ETHERNET END */
 
-    gameloop(graphics);
+    gameloop(graphics,i2c_3,touch);
 }
 
-fn gameloop(mut graphics: graphics::Graphics) -> ! {
+fn gameloop(mut graphics: graphics::Graphics,mut i2c_3: stm32f7::i2c::I2C,mut touch: () ) -> ! {
     // Define Colors
     let red = lcd::Color {red:255, green:0, blue:0, alpha: 255};
     let green = lcd::Color {red:0, green:255, blue:0, alpha: 255};
@@ -139,10 +146,11 @@ fn gameloop(mut graphics: graphics::Graphics) -> ! {
     let mut x = 0;
     let mut y = 0;
     // Initialize Game
-    let mut game = game::Game::new(graphics);
+    let mut game = game::Game::new(graphics,i2c_3,touch);
     loop {
         // let ticks = system_clock::ticks();
         game.draw_game();
-        system_clock::wait(10);
+        game.move_right();
+        system_clock::wait(1000);
     }
 }
