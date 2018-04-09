@@ -13,6 +13,7 @@ RUST_TARGET_PATH=$(pwd) xargo build
 # run
 sh gdb.sh
 # wait for it
+semihosting-enable
 c # continue
 # CTRL+C
 # q (quit)
