@@ -15,15 +15,16 @@ extern crate alloc;
 extern crate r0;
 extern crate smoltcp;
 
-use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock};
-use stm32f7::ethernet::IP_ADDR;
-use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
-use smoltcp::wire::{IpAddress, IpEndpoint};
-use smoltcp::time::Instant;
 use alloc::Vec;
+use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
+use smoltcp::time::Instant;
+use smoltcp::wire::{IpAddress, IpEndpoint};
+use stm32f7::ethernet::IP_ADDR;
+use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock};
 
-mod graphics;
 mod game;
+mod graphics;
+mod network;
 
 pub const HEIGHT: usize = 272;
 pub const WIDTH: usize = 480;
@@ -112,32 +113,33 @@ fn main(hw: board::Hardware) -> ! {
     // init sdram (needed for display buffer)
     sdram::init(rcc, fmc, &mut gpio);
     // lcd controller
-    // let ltdc_pointer = ltdc as *mut board::ltdc::Ltdc;
     let lcd = lcd::init(ltdc, rcc, &mut gpio);
     let graphics = graphics::Graphics::new(lcd);
-    // unsafe {
-    //     (*ltdc_pointer).l1cacr.update(|r| r.set_consta(255));
-    //     (*ltdc_pointer).l2cacr.update(|r| r.set_consta(255));
-    // }
 
     /* ETHERNET START */
-    
+    let network;
+    let mut ethernet_interface = ethernet::EthernetDevice::new(
+        Default::default(),
+        Default::default(),
+        rcc,
+        syscfg,
+        &mut gpio,
+        ethernet_mac,
+        ethernet_dma,
+    ).map(|device| device.into_interface());
+    if let Err(e) = ethernet_interface {
+        println!("ethernet init failed: {:?}", e);
+    };
+    if let Ok(ether) = ethernet_interface {
+        network = network::Network::new(ether);
+    }
+
     /* ETHERNET END */
 
     gameloop(graphics);
 }
 
 fn gameloop(mut graphics: graphics::Graphics) -> ! {
-    // Define Colors
-    let red = lcd::Color {red:255, green:0, blue:0, alpha: 255};
-    let green = lcd::Color {red:0, green:255, blue:0, alpha: 255};
-    let blue = lcd::Color {red:0, green:0, blue:255, alpha: 255};
-    // For iterating colors
-    let colors = [red, green, blue];
-    let mut chosen_color = 0; // colors[chosen_color];
-    // Coordinates to draw to
-    let mut x = 0;
-    let mut y = 0;
     // Initialize Game
     let mut game = game::Game::new(graphics);
     loop {
