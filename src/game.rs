@@ -20,7 +20,6 @@ use super::HEIGHT;
 
 const GRID_BLOCK_SIZE: usize = 10;
 
-   
 
 /**
  * Contains all necessary state information of a game.
@@ -30,6 +29,7 @@ pub struct Game {
     grid: Vec<Vec<Tile>>,
     i2c_3: stm32f7::i2c::I2C,
     touch: (),
+    snake_head_position: (usize,usize),
 }
 
 /**
@@ -38,10 +38,17 @@ pub struct Game {
 #[derive(PartialEq, Clone)]
 enum Tile {
     Empty,
-    SnakeHead,
-    SnakeBody,
-    SnakeTail,
+    SnakeHead(Direction),
+    SnakeBody(Direction),
+    SnakeTail(Direction),
     Apple,
+}
+#[derive(PartialEq, Clone)]
+enum Direction {
+    up,
+    down,
+    left,
+    right,
 }
 
 impl Game {
@@ -56,8 +63,9 @@ impl Game {
             grid: vec![vec![Tile::Empty; game_height]; game_width],
             i2c_3: i2c_3,
             touch: touch,
+            snake_head_position: (25,10), 
         };
-        return_game.grid[25][10] = Tile::SnakeHead;
+        return_game.grid[25][10] = Tile::SnakeHead(Direction::right);
         return_game
     }
 
@@ -67,7 +75,7 @@ impl Game {
     pub fn draw_game(&mut self) {
         for x in 0..self.grid.len() {
             for y in 0..self.grid[0].len() {
-                if self.grid[x][y] == Tile::SnakeHead {
+                if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
                     self.graphics.print_square_size_color_at(
                         x * GRID_BLOCK_SIZE,
                         y * GRID_BLOCK_SIZE,
@@ -79,7 +87,7 @@ impl Game {
                             alpha: 255,
                         },
                     );
-                } else if self.grid[x][y] == Tile::SnakeBody {
+                } else if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
                     self.graphics.print_square_size_color_at(
                         x * GRID_BLOCK_SIZE,
                         y * GRID_BLOCK_SIZE,
@@ -91,7 +99,7 @@ impl Game {
                             alpha: 255,
                         },
                     );
-                } else if self.grid[x][y] == Tile::SnakeTail {
+                } else if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
                     self.graphics.print_square_size_color_at(
                         x * GRID_BLOCK_SIZE,
                         y * GRID_BLOCK_SIZE,
@@ -103,7 +111,7 @@ impl Game {
                             alpha: 255,
                         },
                     );
-                } else if self.grid[x][y] == Tile::Apple {
+                } else if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
                     self.graphics.print_square_size_color_at(
                         x * GRID_BLOCK_SIZE,
                         y * GRID_BLOCK_SIZE,
@@ -116,7 +124,7 @@ impl Game {
                         },
                     );
                 }
-                else if self.grid[x][y] == Tile::Empty {
+                else if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
                     self.graphics.print_square_size_color_at(
                         x * GRID_BLOCK_SIZE,
                         y * GRID_BLOCK_SIZE,
@@ -139,9 +147,10 @@ impl Game {
     pub fn move_up(&mut self) {
         for x in 0..self.grid.len() - 1 {
             for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y] == Tile::SnakeHead {
-                    self.grid[x][y - 1] = Tile::SnakeHead;
+                if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
+                    self.grid[x][y - 1] = Tile::SnakeHead(Direction::up);
                     self.grid[x][y] = Tile::Empty;
+                    self.snake_head_position.0 = y-1;
                     return;
                 }
             }
@@ -154,9 +163,10 @@ impl Game {
     pub fn move_down(&mut self) {
         for x in 0..self.grid.len() - 1 {
             for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y] == Tile::SnakeHead {
-                    self.grid[x][y + 1] = Tile::SnakeHead;
+                if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
+                    self.grid[x][y + 1] = Tile::SnakeHead(Direction::down);
                     self.grid[x][y] = Tile::Empty;
+                    self.snake_head_position.0 = y+1;
                     return;
                 }
             }
@@ -169,9 +179,10 @@ impl Game {
     pub fn move_right(&mut self) {
         for x in 0..self.grid.len() - 1 {
             for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y] == Tile::SnakeHead {
-                    self.grid[x + 1][y] = Tile::SnakeHead;
+                if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
+                    self.grid[x + 1][y] = Tile::SnakeHead(Direction::right);
                     self.grid[x][y] = Tile::Empty;
+                    self.snake_head_position.0 = x+1;
                     return;
                 }
             }
@@ -184,9 +195,10 @@ impl Game {
     pub fn move_left(&mut self) {
         for x in 0..self.grid.len() - 1 {
             for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y] == Tile::SnakeHead {
-                    self.grid[x - 1][y] = Tile::SnakeHead;
+                if self.grid[x][y] == self.grid[self.snake_head_position.0][self.snake_head_position.1] {
+                    self.grid[x - 1][y] = Tile::SnakeHead(Direction::left);
                     self.grid[x][y] = Tile::Empty;
+                    self.snake_head_position.0 = x-1;
                     return;
                 }
             }
@@ -197,9 +209,23 @@ impl Game {
      * Calls the correct function to turn to the right direction
      */
 
-    // pub fn turn_position() {
-    //     if 
-    // }
+    pub fn turn_position(&mut self) {
+        if self.grid[self.snake_head_position.0][self.snake_head_position.1] == Tile::SnakeHead(Direction::up) {
+            self.move_up();
+        }
+        else if self.grid[self.snake_head_position.0][self.snake_head_position.1] == Tile::SnakeHead(Direction::down) {
+            self.move_down();
+        }
+        else if self.grid[self.snake_head_position.0][self.snake_head_position.1] == Tile::SnakeHead(Direction::left) {
+            self.move_left();
+        }
+        else if self.grid[self.snake_head_position.0][self.snake_head_position.1] == Tile::SnakeHead(Direction::left) {
+            self.move_right();
+        }
+
+
+    }
+    
 
     /**
      * Sets the direction chosen by the user
