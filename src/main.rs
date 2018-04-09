@@ -12,18 +12,15 @@ extern crate stm32f7_discovery as stm32f7; // initialization routines for .data 
 // initialization routines for .data and .bss
 #[macro_use]
 extern crate alloc;
+extern crate arrayvec;
 extern crate r0;
 extern crate smoltcp;
 
-use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock, i2c, touch};
-use stm32f7::ethernet::IP_ADDR;
-use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
-use smoltcp::wire::{IpAddress, IpEndpoint};
-use smoltcp::time::Instant;
-use alloc::Vec;
+#[macro_use]
+use stm32f7::{board, embedded, ethernet, exceptions, lcd, sdram, system_clock, touch, i2c};
 
-mod graphics;
 mod game;
+mod graphics;
 
 pub const HEIGHT: usize = 272;
 pub const WIDTH: usize = 480;
@@ -113,40 +110,27 @@ fn main(hw: board::Hardware) -> ! {
     // init sdram (needed for display buffer)
     sdram::init(rcc, fmc, &mut gpio);
     // lcd controller
-    // let ltdc_pointer = ltdc as *mut board::ltdc::Ltdc;
     let lcd = lcd::init(ltdc, rcc, &mut gpio);
     let graphics = graphics::Graphics::new(lcd);
 
+    //i2c
     i2c::init_pins_and_clocks(rcc, &mut gpio);
     let mut i2c_3 = i2c::init(i2c_3);
-    let mut touch = touch::check_family_id(&mut i2c_3).unwrap();
+    i2c_3.test_1();
+    i2c_3.test_2();
 
-
-    // unsafe {
-    //     (*ltdc_pointer).l1cacr.update(|r| r.set_consta(255));
-    //     (*ltdc_pointer).l2cacr.update(|r| r.set_consta(255));
-    // }
+    touch::check_family_id(&mut i2c_3).unwrap();
 
     /* ETHERNET START */
-    
+
     /* ETHERNET END */
 
-    gameloop(graphics,i2c_3,touch);
+    // Initialize Game
+    let mut game = game::Game::new(graphics, i2c_3);
+    gameloop(game);
 }
 
-fn gameloop(mut graphics: graphics::Graphics,mut i2c_3: stm32f7::i2c::I2C,mut touch: () ) -> ! {
-    // Define Colors
-    let red = lcd::Color {red:255, green:0, blue:0, alpha: 255};
-    let green = lcd::Color {red:0, green:255, blue:0, alpha: 255};
-    let blue = lcd::Color {red:0, green:0, blue:255, alpha: 255};
-    // For iterating colors
-    let colors = [red, green, blue];
-    let mut chosen_color = 0; // colors[chosen_color];
-    // Coordinates to draw to
-    let mut x = 0;
-    let mut y = 0;
-    // Initialize Game
-    let mut game = game::Game::new(graphics,i2c_3,touch);
+fn gameloop(mut game: game::Game) -> ! {
     loop {
         // let ticks = system_clock::ticks();
         game.draw_game();

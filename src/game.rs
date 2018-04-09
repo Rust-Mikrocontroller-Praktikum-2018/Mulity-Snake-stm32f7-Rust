@@ -3,24 +3,19 @@
 #![feature(compiler_builtins_lib)]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy))]
 
+extern crate arrayvec;
 extern crate compiler_builtins;
-extern crate stm32f7_discovery as stm32f7; // initialization routines for .data and .bss
 extern crate r0;
-
-
+extern crate stm32f7_discovery as stm32f7; // initialization routines for .data and .bss
 
 use alloc::Vec;
 use graphics;
-use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock, i2c, touch};
+use stm32f7::{lcd, touch};
 
-
-use super::WIDTH;
 use super::HEIGHT;
-
+use super::WIDTH;
 
 const GRID_BLOCK_SIZE: usize = 10;
-
-   
 
 /**
  * Contains all necessary state information of a game.
@@ -29,7 +24,6 @@ pub struct Game {
     graphics: graphics::Graphics,
     grid: Vec<Vec<Tile>>,
     i2c_3: stm32f7::i2c::I2C,
-    touch: (),
 }
 
 /**
@@ -48,14 +42,13 @@ impl Game {
     /**
      * Create a new game.
      */
-    pub fn new(graphics: graphics::Graphics,i2c_3: stm32f7::i2c::I2C, touch: () ) -> Game {
+    pub fn new(graphics: graphics::Graphics, i2c_3: stm32f7::i2c::I2C) -> Game {
         let game_width = WIDTH / GRID_BLOCK_SIZE;
         let game_height = HEIGHT / GRID_BLOCK_SIZE;
         let mut return_game = Game {
             graphics: graphics,
             grid: vec![vec![Tile::Empty; game_height]; game_width],
             i2c_3: i2c_3,
-            touch: touch,
         };
         return_game.grid[25][10] = Tile::SnakeHead;
         return_game
@@ -115,8 +108,7 @@ impl Game {
                             alpha: 255,
                         },
                     );
-                }
-                else if self.grid[x][y] == Tile::Empty {
+                } else if self.grid[x][y] == Tile::Empty {
                     self.graphics.print_square_size_color_at(
                         x * GRID_BLOCK_SIZE,
                         y * GRID_BLOCK_SIZE,
@@ -198,28 +190,36 @@ impl Game {
      */
 
     // pub fn turn_position() {
-    //     if 
+    //     if
     // }
 
     /**
      * Sets the direction chosen by the user
      */
-
     pub fn choose_direction(&mut self) {
-
-            
-            for touch in &self.touch::touches(&mut self.i2c_3).unwrap() {
-                let mut x = touch.x;
-                let mut y = touch.y;
+        let touches = self.get_touches();
+        for touch in touches {
+            let mut x = touch.0;
+            let mut y = touch.1;
 
             if x > 10 && x < 70 {
-            self.move_down();   
+                self.move_down();
+            } else if x > 410 && x < 470 {
+                self.move_up();
             }
-            else if x > 410 && x < 470 { 
-            self.move_up();
-            }
+        }
+    }
 
-        
-            }
+    /**
+     * returns touches array
+     */
+    fn get_touches(&mut self) -> Vec<(u16, u16)> {
+        // &touch::touches(&mut self.i2c_3).unwrap()
+        let mut touches = Vec::new();
+        for touch in &touch::touches(&mut self.i2c_3).unwrap() {
+            // .print_point_at(touch.x as usize, touch.y as usize);
+            touches.push((touch.x, touch.y));
+        }
+        touches
     }
 }
