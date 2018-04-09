@@ -2,6 +2,7 @@
 #![no_main]
 #![feature(compiler_builtins_lib)]
 #![feature(asm)]
+#![feature(alloc)]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy))]
 
 extern crate compiler_builtins;
@@ -9,32 +10,42 @@ extern crate compiler_builtins;
 extern crate stm32f7_discovery as stm32f7; // initialization routines for .data and .bss
 
 // initialization routines for .data and .bss
+#[macro_use]
+extern crate alloc;
 extern crate r0;
+extern crate smoltcp;
 
-use stm32f7::{board, embedded, lcd, sdram, system_clock};
+use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock};
+use stm32f7::ethernet::IP_ADDR;
+use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
+use smoltcp::wire::{IpAddress, IpEndpoint};
+use smoltcp::time::Instant;
+use alloc::Vec;
+
+mod graphics;
+mod game;
+
+pub const HEIGHT: usize = 272;
+pub const WIDTH: usize = 480;
 
 #[no_mangle]
 pub unsafe extern "C" fn reset() -> ! {
     extern "C" {
         static __DATA_LOAD: u32;
-        static __DATA_END: u32;
+        static mut __DATA_END: u32;
         static mut __DATA_START: u32;
+
         static mut __BSS_START: u32;
         static mut __BSS_END: u32;
     }
-    let data_load = &__DATA_LOAD;
-    let data_start = &mut __DATA_START;
-    let data_end = &__DATA_END;
-    let bss_start = &mut __BSS_START;
-    let bss_end = &__BSS_END;
 
     // initializes the .data section (copy the data segment initializers from flash to RAM)
-    r0::init_data(data_start, data_end, data_load);
+    r0::init_data(&mut __DATA_START, &mut __DATA_END, &__DATA_LOAD);
     // zeroes the .bss section
-    r0::zero_bss(bss_start, bss_end);
+    r0::zero_bss(&mut __BSS_START, &__BSS_END);
 
     stm32f7::heap::init();
-    
+
     // enable floating point unit
     let scb = stm32f7::cortex_m::peripheral::scb_mut();
     scb.cpacr.modify(|v| v | 0b1111 << 20);
@@ -61,6 +72,9 @@ fn main(hw: board::Hardware) -> ! {
         gpio_i,
         gpio_j,
         gpio_k,
+        syscfg,
+        ethernet_mac,
+        ethernet_dma,
         ..
     } = hw;
 
@@ -98,38 +112,37 @@ fn main(hw: board::Hardware) -> ! {
     // init sdram (needed for display buffer)
     sdram::init(rcc, fmc, &mut gpio);
     // lcd controller
-    let mut lcd = lcd::init(ltdc, rcc, &mut gpio);
+    // let ltdc_pointer = ltdc as *mut board::ltdc::Ltdc;
+    let lcd = lcd::init(ltdc, rcc, &mut gpio);
+    let graphics = graphics::Graphics::new(lcd);
+    // unsafe {
+    //     (*ltdc_pointer).l1cacr.update(|r| r.set_consta(255));
+    //     (*ltdc_pointer).l2cacr.update(|r| r.set_consta(255));
+    // }
 
-    // let mut layer_1 = lcd.layer_1().unwrap();
-    let mut layer_1 = match lcd.layer_1() {
-        Some(layer1) => layer1,
-        None => panic!("No lcd.layer_1!"),
-    };
+    /* ETHERNET START */
+    
+    /* ETHERNET END */
 
-    // let mut layer_2 = lcd.layer_2().unwrap();
-    let mut layer_2 = match lcd.layer_2() {
-        Some(layer2) => layer2,
-        None => panic!("No lcd.layer_2!"),
-    };
-
-    layer_1.clear();
-    layer_2.clear();
-
-    lcd.set_background_color(lcd::Color::from_hex(0x000000));
-
-    lcd::init_stdout(layer_2);
-
-
-    gameloop(lcd);
+    gameloop(graphics);
 }
 
-fn gameloop(lcd: lcd::Lcd) -> ! {
-    println!("Hello Snaker! :)");
-    println!("It's Mulity Snaker Time!");
-    println!("https://github.com/iBaff/Multi-Snake-stm32f7-Rust ❽");
-    println!("http://arewegameyet.com/ ൠ");
-    println!("Maybe we make a text game?ᴥ");
+fn gameloop(mut graphics: graphics::Graphics) -> ! {
+    // Define Colors
+    let red = lcd::Color {red:255, green:0, blue:0, alpha: 255};
+    let green = lcd::Color {red:0, green:255, blue:0, alpha: 255};
+    let blue = lcd::Color {red:0, green:0, blue:255, alpha: 255};
+    // For iterating colors
+    let colors = [red, green, blue];
+    let mut chosen_color = 0; // colors[chosen_color];
+    // Coordinates to draw to
+    let mut x = 0;
+    let mut y = 0;
+    // Initialize Game
+    let mut game = game::Game::new(graphics);
     loop {
-        let ticks = system_clock::ticks();
+        // let ticks = system_clock::ticks();
+        game.draw_game();
+        system_clock::wait(10);
     }
 }
