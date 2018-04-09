@@ -22,6 +22,7 @@ use stm32f7::{board, embedded, ethernet, exceptions, lcd, sdram, system_clock, t
 mod game;
 mod graphics;
 mod random;
+mod network;
 
 pub const HEIGHT: usize = 272;
 pub const WIDTH: usize = 480;
@@ -124,6 +125,22 @@ fn main(hw: board::Hardware) -> ! {
     touch::check_family_id(&mut i2c_3).unwrap();
 
     /* ETHERNET START */
+    let network;
+    let mut ethernet_interface = ethernet::EthernetDevice::new(
+        Default::default(),
+        Default::default(),
+        rcc,
+        syscfg,
+        &mut gpio,
+        ethernet_mac,
+        ethernet_dma,
+    ).map(|device| device.into_interface());
+    if let Err(e) = ethernet_interface {
+        println!("ethernet init failed: {:?}", e);
+    };
+    if let Ok(ether) = ethernet_interface {
+        network = network::Network::new(ether);
+    }
 
     /* ETHERNET END */
     // l0et layer2 = lcd::Layer<lcd::FramebufferAl88>;
