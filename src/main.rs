@@ -126,7 +126,7 @@ fn main(hw: board::Hardware) -> ! {
 
     /* ETHERNET START */
     let network;
-    let mut ethernet_interface = ethernet::EthernetDevice::new(
+    let mut ethernet_device = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),
         rcc,
@@ -134,12 +134,13 @@ fn main(hw: board::Hardware) -> ! {
         &mut gpio,
         ethernet_mac,
         ethernet_dma,
-    ).map(|device| device.into_interface());
-    if let Err(e) = ethernet_interface {
+    );
+    if let Err(e) = ethernet_device {
         println!("ethernet init failed: {:?}", e);
+        panic!("ethernet init failed: {:?}", e);
     };
-    if let Ok(ether) = ethernet_interface {
-        network = network::Network::new(ether);
+    if let Ok(ether) = ethernet_device {
+        network = network::Network::new(ether, network::NetworkMode::client);
     }
 
     /* ETHERNET END */
