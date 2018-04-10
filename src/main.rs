@@ -131,10 +131,11 @@ fn main(hw: board::Hardware) -> ! {
 }
 
 fn gameloop(mut game: game::Game) -> ! {
+
     loop {
         // let ticks = system_clock::ticks();
+        game.move_snake();
         game.draw_game();
-        game.move_right();
-        system_clock::wait(1000);
+        system_clock::wait(500);
     }
 }

@@ -111,7 +111,7 @@ impl Game {
             },
         );
 
-        // draw tail (bmp of tail)
+        // erase former tail (bmp of tail)
         self.graphics.print_square_size_color_at(
             self.former_snake_tail.0 * GRID_BLOCK_SIZE,
             self.former_snake_tail.1 * GRID_BLOCK_SIZE,
@@ -214,10 +214,10 @@ impl Game {
     }
 
     /**
-     * Calls the correct function to turn to the right direction
+     * Calls the correct function to turn to move the snake straight forward
      */
 
-    pub fn turn_position(&mut self) {
+    pub fn move_straight(&mut self) {
         if self.grid[self.snake_head_position.0][self.snake_head_position.1]
             == Tile::SnakeHead(Direction::up)
         {
@@ -231,30 +231,79 @@ impl Game {
         {
             self.move_left();
         } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
-            == Tile::SnakeHead(Direction::left)
+            == Tile::SnakeHead(Direction::right)
         {
             self.move_right();
         }
     }
 
-// /**
-//  * Sets the direction chosen by the user
-//  */
+    /**
+     * Calls the correct function to turn the snake to the right
+     */
+
+    pub fn turn_right(&mut self) {
+        if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::up)
+        {
+            self.move_right();
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::down)
+        {
+            self.move_left();
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::left)
+        {
+            self.move_up();
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::right)
+        {
+            self.move_down();
+        }
+    }
+
+    /**
+     * Calls the correct function to turn the snake to the left
+     */
+
+    pub fn turn_left(&mut self) {
+        if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::up)
+        {
+            self.move_left();
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::down)
+        {
+            self.move_right();
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::left)
+        {
+            self.move_down();
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::right)
+        {
+            self.move_up();
+        }
+    }
 
     /**
      * Sets the direction chosen by the user
      */
-    pub fn choose_direction(&mut self) {
+    pub fn move_snake(&mut self) {
         let touches = self.get_touches();
-        for touch in touches {
-            let mut x = touch.0;
-            let mut y = touch.1;
+        println!("{}", touches.len());
+        if touches.len() == 1 {
+            for touch in touches {
+                let mut x = touch.0;
+                let mut y = touch.1;
 
-            if x > 10 && x < 70 {
-                self.move_down();
-            } else if x > 410 && x < 470 {
-                self.move_up();
+                if x < 70 {
+                    self.turn_left();
+                } else if x > 410 {
+                    self.turn_right();
+                }
             }
+        } else {
+            self.move_straight();
         }
     }
 
