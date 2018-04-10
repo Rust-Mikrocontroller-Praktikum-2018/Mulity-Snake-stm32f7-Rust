@@ -121,24 +121,38 @@ fn main(hw: board::Hardware) -> ! {
     // }
 
     /* ETHERNET START */
-    
+
     /* ETHERNET END */
 
     let pic: &[u8] = include_bytes!("../assets/Test7.bmp");
-    graphics.print_bmp_at(pic,10,270);
-
+    graphics.print_bmp_at_with_rotaion(pic, 0, 271, graphics::RotDirection::r_0);
     gameloop(graphics);
 }
 
 fn gameloop(mut graphics: graphics::Graphics) -> ! {
     // Define Colors
-    let red = lcd::Color {red:255, green:0, blue:0, alpha: 255};
-    let green = lcd::Color {red:0, green:255, blue:0, alpha: 255};
-    let blue = lcd::Color {red:0, green:0, blue:255, alpha: 255};
+    let red = lcd::Color {
+        red: 255,
+        green: 0,
+        blue: 0,
+        alpha: 255,
+    };
+    let green = lcd::Color {
+        red: 0,
+        green: 255,
+        blue: 0,
+        alpha: 255,
+    };
+    let blue = lcd::Color {
+        red: 0,
+        green: 0,
+        blue: 255,
+        alpha: 255,
+    };
     // For iterating colors
     let colors = [red, green, blue];
     let mut chosen_color = 0; // colors[chosen_color];
-    // Coordinates to draw to
+                              // Coordinates to draw to
     let mut x = 0;
     let mut y = 0;
     // Initialize Game
