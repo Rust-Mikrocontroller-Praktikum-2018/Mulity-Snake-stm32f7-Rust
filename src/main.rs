@@ -125,7 +125,7 @@ fn main(hw: board::Hardware) -> ! {
     /* ETHERNET END */
 
     let pic: &[u8] = include_bytes!("../assets/Test7.bmp");
-    graphics.print_bmp_at_with_rotaion(pic, 0, 271, graphics::RotDirection::r_0);
+    graphics.print_bmp_at_with_rotaion(pic, 0, 0, graphics::RotDirection::r_270);
     gameloop(graphics);
 }
 
