@@ -138,7 +138,8 @@ fn gameloop(mut game: game::Game) -> ! {
     loop {
         // let ticks = system_clock::ticks();
         game.move_snake();
+        game.snake_bite();
         game.draw_game();
-        system_clock::wait(500);
+        system_clock::wait(100);
     }
 }
