@@ -15,15 +15,16 @@ extern crate alloc;
 extern crate r0;
 extern crate smoltcp;
 
-use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock};
-use stm32f7::ethernet::IP_ADDR;
-use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
-use smoltcp::wire::{IpAddress, IpEndpoint};
-use smoltcp::time::Instant;
 use alloc::Vec;
+use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
+use smoltcp::time::Instant;
+use smoltcp::wire::{IpAddress, IpEndpoint};
+use stm32f7::ethernet::IP_ADDR;
+use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock};
 
-mod graphics;
 mod game;
+mod graphics;
+mod random;
 
 pub const HEIGHT: usize = 272;
 pub const WIDTH: usize = 480;
@@ -75,6 +76,7 @@ fn main(hw: board::Hardware) -> ! {
         syscfg,
         ethernet_mac,
         ethernet_dma,
+        rng,
         ..
     } = hw;
 
@@ -112,32 +114,56 @@ fn main(hw: board::Hardware) -> ! {
     // init sdram (needed for display buffer)
     sdram::init(rcc, fmc, &mut gpio);
     // lcd controller
-    // let ltdc_pointer = ltdc as *mut board::ltdc::Ltdc;
     let lcd = lcd::init(ltdc, rcc, &mut gpio);
     let graphics = graphics::Graphics::new(lcd);
-    // unsafe {
-    //     (*ltdc_pointer).l1cacr.update(|r| r.set_consta(255));
-    //     (*ltdc_pointer).l2cacr.update(|r| r.set_consta(255));
-    // }
+
+    // Random gen
+    let mut random_gen = random::Random::new(rng, rcc);
+    
+    let from = 0;
+    let to = u32::max_value();
+    let r = random_gen.random_range(from, to);
+    hprintln!("r={}", r);
+    assert!(from <= r);
+    assert!(r < to);
+    hprintln!("----------------------------");
+    let from = 1;
+    let to = u32::max_value();
+    let r = random_gen.random_range(from, to);
+    hprintln!("r={}", r);
+    assert!(from <= r);
+    assert!(r < to);
+    hprintln!("----------------------------");
+    let from = 10;
+    let to = u32::max_value() - 1;
+    let r = random_gen.random_range(from, to);
+    hprintln!("r={}", r);
+    assert!(from <= r);
+    assert!(r < to);
+    hprintln!("----------------------------");
+    let from = 1;
+    let to   = 3;
+    let r = random_gen.random_range(from, to);
+    hprintln!("r={}", r);
+    assert!(from <= r);
+    assert!(r < to);
+    hprintln!("----------------------------");
+    let from = 1;
+    let to   = 30;
+    let r = random_gen.random_range(from, to);
+    hprintln!("r={}", r);
+    assert!(from <= r);
+    assert!(r < to);
+    hprintln!("----------------------------");
 
     /* ETHERNET START */
-    
+
     /* ETHERNET END */
 
     gameloop(graphics);
 }
 
 fn gameloop(mut graphics: graphics::Graphics) -> ! {
-    // Define Colors
-    let red = lcd::Color {red:255, green:0, blue:0, alpha: 255};
-    let green = lcd::Color {red:0, green:255, blue:0, alpha: 255};
-    let blue = lcd::Color {red:0, green:0, blue:255, alpha: 255};
-    // For iterating colors
-    let colors = [red, green, blue];
-    let mut chosen_color = 0; // colors[chosen_color];
-    // Coordinates to draw to
-    let mut x = 0;
-    let mut y = 0;
     // Initialize Game
     let mut game = game::Game::new(graphics);
     loop {
