@@ -52,6 +52,7 @@ pub unsafe extern "C" fn reset() -> ! {
 }
 
 fn main(hw: board::Hardware) -> ! {
+    
     let board::Hardware {
         rcc,
         pwr,
@@ -128,8 +129,10 @@ fn main(hw: board::Hardware) -> ! {
     // Initialize Game
     let mut game = game::Game::new(graphics, i2c_3);
     gameloop(game);
+    
 }
-
+ 
+ 
 fn gameloop(mut game: game::Game) -> ! {
 
     loop {

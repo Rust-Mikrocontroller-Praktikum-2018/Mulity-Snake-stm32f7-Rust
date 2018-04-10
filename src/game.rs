@@ -3,6 +3,7 @@
 #![feature(compiler_builtins_lib)]
 #![cfg_attr(feature = "cargo-clippy", warn(clippy))]
 
+
 extern crate arrayvec;
 extern crate compiler_builtins;
 extern crate r0;
@@ -25,7 +26,7 @@ pub struct Game {
     grid: Vec<Vec<Tile>>,
     i2c_3: stm32f7::i2c::I2C,
     snake_head_position: (usize, usize),
-    snake_body_position: (usize, usize),
+    snake_body_position: Vec<(usize, usize)>,
     snake_tail_position: (usize, usize),
     former_snake_tail: (usize, usize),
 }
@@ -61,7 +62,7 @@ impl Game {
             grid: vec![vec![Tile::Empty; game_height]; game_width],
             i2c_3: i2c_3,
             snake_head_position: (25, 10),
-            snake_body_position: (24, 10),
+            snake_body_position: vec![(24, 10)],
             snake_tail_position: (23, 10),
             former_snake_tail: (22, 10),
         };
@@ -86,17 +87,19 @@ impl Game {
             },
         );
         // draw body (bmp of body)
-        self.graphics.print_square_size_color_at(
-            self.snake_body_position.0 * GRID_BLOCK_SIZE,
-            self.snake_body_position.1 * GRID_BLOCK_SIZE,
-            GRID_BLOCK_SIZE,
-            lcd::Color {
-                red: 255,
-                green: 0,
-                blue: 0,
-                alpha: 255,
-            },
-        );
+        for i in 0..self.snake_body_position.len() {
+            self.graphics.print_square_size_color_at(
+                self.snake_body_position[i].0 * GRID_BLOCK_SIZE,
+                self.snake_body_position[i].1 * GRID_BLOCK_SIZE,
+                GRID_BLOCK_SIZE,
+                lcd::Color {
+                    red: 255,
+                    green: 0,
+                    blue: 0,
+                    alpha: 255,
+                },
+            );
+        }
 
         // draw tail (bmp of tail)
         self.graphics.print_square_size_color_at(
@@ -123,6 +126,21 @@ impl Game {
                 alpha: 255,
             },
         );
+
+         // draw apple (bmp of apple)
+        
+        self.graphics.print_square_size_color_at(
+            self.former_snake_tail.0 * GRID_BLOCK_SIZE,
+            self.former_snake_tail.1 * GRID_BLOCK_SIZE,
+            GRID_BLOCK_SIZE,
+            lcd::Color {
+                red: 0,
+                green: 0,
+                blue: 0,
+                alpha: 255,
+            },
+        );
+
     }
 
     /**
@@ -137,9 +155,10 @@ impl Game {
                     self.grid[x][y - 1] = Tile::SnakeHead(Direction::up);
                     self.grid[x][y] = Tile::Empty;
                     self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position = self.snake_body_position;
-                    self.snake_body_position = self.snake_head_position;
-                    self.snake_head_position.1 = y - 1;
+                    self.snake_tail_position =
+                        self.snake_body_position[self.snake_body_position.len()];
+                    self.snake_body_position[0] = self.snake_head_position;
+                    self.snake_head_position.1 = y - 1; 
 
                     return;
                 }
@@ -159,8 +178,9 @@ impl Game {
                     self.grid[x][y + 1] = Tile::SnakeHead(Direction::down);
                     self.grid[x][y] = Tile::Empty;
                     self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position = self.snake_body_position;
-                    self.snake_body_position = self.snake_head_position;
+                    self.snake_tail_position =
+                        self.snake_body_position[self.snake_body_position.len()];
+                    self.snake_body_position[0] = self.snake_head_position;
                     self.snake_head_position.1 = y + 1;
 
                     return;
@@ -181,8 +201,9 @@ impl Game {
                     self.grid[x + 1][y] = Tile::SnakeHead(Direction::right);
                     self.grid[x][y] = Tile::Empty;
                     self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position = self.snake_body_position;
-                    self.snake_body_position = self.snake_head_position;
+                    self.snake_tail_position =
+                        self.snake_body_position[self.snake_body_position.len()];
+                    self.snake_body_position[0] = self.snake_head_position;
                     self.snake_head_position.0 = x + 1;
 
                     return;
@@ -203,8 +224,9 @@ impl Game {
                     self.grid[x - 1][y] = Tile::SnakeHead(Direction::left);
                     self.grid[x][y] = Tile::Empty;
                     self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position = self.snake_body_position;
-                    self.snake_body_position = self.snake_head_position;
+                    self.snake_tail_position =
+                        self.snake_body_position[self.snake_body_position.len()];
+                    self.snake_body_position[0] = self.snake_head_position;
                     self.snake_head_position.0 = x - 1;
 
                     return;
