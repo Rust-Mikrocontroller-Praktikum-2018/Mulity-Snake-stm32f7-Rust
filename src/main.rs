@@ -153,10 +153,10 @@ fn gameloop(mut game: game::Game) -> ! {
             game.graphics.print_bmp_at_downwards(pic3, 188, 85);
         }
     }
-    game.graphics.print_bmp_at_with_rotaion(pic, 0, 0, graphics::RotDirection::r_0);
-    game.graphics.print_bmp_at_with_rotaion(pic, 85, 0, graphics::RotDirection::r_90);
-    game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);
-    game.graphics.print_bmp_at_with_rotaion(pic, 260, 0, graphics::RotDirection::r_270);
+    // game.graphics.print_bmp_at_with_rotaion(pic, 0, 0, graphics::RotDirection::r_0);
+    // game.graphics.print_bmp_at_with_rotaion(pic, 85, 0, graphics::RotDirection::r_90);
+    // game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);
+    // game.graphics.print_bmp_at_with_rotaion(pic, 260, 0, graphics::RotDirection::r_270);
     loop {
         // let ticks = system_clock::ticks();
         game.move_snake();
