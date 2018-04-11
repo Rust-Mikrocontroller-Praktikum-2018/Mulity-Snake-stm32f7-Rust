@@ -161,8 +161,8 @@ fn gameloop(mut game: game::Game) -> ! {
     // game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);
     // game.graphics.print_bmp_at_with_rotaion(pic, 260, 0, graphics::RotDirection::r_270);
     /* Random Example */
-    let ran = game.random_gen.random_range(0, 42);
-    println!("A random number: 0 <= {} < 42!!!", ran);
+    // let ran = game.random_gen.random_range(0, 42);
+    // println!("A random number: 0 <= {} < 42!!!", ran);
     game.set_backround_color();
     loop {
         // let ticks = system_clock::ticks();

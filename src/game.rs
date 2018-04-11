@@ -88,7 +88,7 @@ impl Game {
             self.snake_head_position.1 * GRID_BLOCK_SIZE,
             GRID_BLOCK_SIZE - 1,
             lcd::Color {
-                red: 255,
+                red: 0,
                 green: 0,
                 blue: 0,
                 alpha: 255,
@@ -115,9 +115,9 @@ impl Game {
             self.snake_tail_position.1 * GRID_BLOCK_SIZE,
             GRID_BLOCK_SIZE - 1,
             lcd::Color {
-                red: 255,
+                red: 0,
                 green: 0,
-                blue: 0,
+                blue: 255,
                 alpha: 255,
             },
         );
@@ -144,7 +144,7 @@ impl Game {
             self.apple_position.1 * GRID_BLOCK_SIZE,
             GRID_BLOCK_SIZE - 1,
             lcd::Color {
-                red: 0,
+                red: 255,
                 green: 255,
                 blue: 0,
                 alpha: 255,
@@ -333,7 +333,11 @@ impl Game {
             self.snake_body_position.push(self.snake_tail_position);
             self.snake_tail_position = self.former_snake_tail;
             self.former_snake_tail = (0, 0); // has to be improved
-                                             // missing random apple position
+            let x = self.random_gen
+                .random_range(1, WIDTH as u32 / GRID_BLOCK_SIZE as u32 - 1);
+            let y = self.random_gen
+                .random_range(1, HEIGHT as u32 / GRID_BLOCK_SIZE as u32 - 1);
+            self.apple_position = (x as usize, y as usize);
         }
     }
 
@@ -355,29 +359,35 @@ impl Game {
      */
     pub fn check_grid_edge(&mut self) {
         if self.grid[self.snake_head_position.0][self.snake_head_position.1]
-            == Tile::SnakeHead(Direction::right) && self.snake_head_position.0 == 46
+            != Tile::SnakeHead(Direction::left)
+            && self.snake_head_position.0 == WIDTH / GRID_BLOCK_SIZE - 1
         {
             self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
             self.snake_head_position.0 = 1;
             self.grid[self.snake_head_position.0][self.snake_head_position.1] =
                 Tile::SnakeHead(Direction::right);
         } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
-            == Tile::SnakeHead(Direction::left) && self.snake_head_position.0 == 1
+            != Tile::SnakeHead(Direction::right)
+            && self.snake_head_position.0 == 0
         {
             self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
-            self.snake_head_position.0 = 46;
+            self.snake_head_position.0 = WIDTH / GRID_BLOCK_SIZE - 1;
             self.grid[self.snake_head_position.0][self.snake_head_position.1] =
                 Tile::SnakeHead(Direction::left);
         } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
-            == Tile::SnakeHead(Direction::up) && self.snake_head_position.1 == 1
+            != Tile::SnakeHead(Direction::down) && self.snake_head_position.1 == 0
         {
             self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
-            self.snake_head_position.1 = 26;
+            self.snake_head_position.1 = HEIGHT / GRID_BLOCK_SIZE - 2;
+            hprintln!("{}", HEIGHT);
+            hprintln!("{}", GRID_BLOCK_SIZE);
+            hprintln!("{}", self.snake_head_position.1);
+
             self.grid[self.snake_head_position.0][self.snake_head_position.1] =
                 Tile::SnakeHead(Direction::up);
         } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
-            == Tile::SnakeHead(Direction::down)
-            && self.snake_head_position.1 == 26
+            != Tile::SnakeHead(Direction::up)
+            && self.snake_head_position.1 == HEIGHT / GRID_BLOCK_SIZE - 1
         {
             self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
             self.snake_head_position.1 = 1;
@@ -386,19 +396,19 @@ impl Game {
         }
     }
     /**
-     * set backround color
+     * Set backround color
      */
     pub fn set_backround_color(&mut self) {
-        for x in 0..WIDTH {
-            for y in 0..HEIGHT {
+        for x in 5..WIDTH - 5 {
+            for y in 5..HEIGHT - 5 {
                 self.graphics.print_square_size_color_at(
                     x,
                     y,
                     1,
                     lcd::Color {
-                        red: 0,
-                        green: 0,
-                        blue: 0,
+                        red: 156,
+                        green: 193,
+                        blue: 54,
                         alpha: 255,
                     },
                 );
