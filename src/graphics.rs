@@ -2,8 +2,8 @@ use stm32f7::lcd;
 
 pub struct Graphics {
     lcd: lcd::Lcd,
-    layer_1: lcd::Layer<lcd::FramebufferArgb8888>,
-    layer_2: lcd::Layer<lcd::FramebufferAl88>,
+    pub layer_1: lcd::Layer<lcd::FramebufferArgb8888>,
+    pub layer_2: lcd::Layer<lcd::FramebufferAl88>,
 }
 
 pub enum RotDirection {
@@ -12,6 +12,13 @@ pub enum RotDirection {
     r_180,
     r_270,
 }
+
+pub const pause_screen_top: &[u8] = include_bytes!("../assets/Pause_screen_top.bmp");
+pub const pause_screen_resume: &[u8] = include_bytes!("../assets/Pause_screen_resume.bmp");
+pub const pause_screen_new_game: &[u8] = include_bytes!("../assets/Pause_screen_New_game.bmp");
+pub const welcome_screen_base: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
+pub const welcome_screen_open_mouth: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
+pub const welcome_screen_closed_mouth: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
 
 impl Graphics {
     /**
@@ -117,7 +124,7 @@ impl Graphics {
                 }
             },
             RotDirection::r_90 => for i in 0..rot_height {
-                bytenr = pixels_start + width * 3 - 3 * (i + 1) - pixel_rest;
+                bytenr = pixels_start + width * 3 - 3 * (i + 1);
                 for j in 0..rot_width {
                     self.layer_1.print_point_color_at(
                         (j + at_x) as usize,
@@ -132,6 +139,7 @@ impl Graphics {
                 }
             },
             RotDirection::r_180 => for i in 0..height {
+                bytenr = bytenr - pixel_rest;
                 for j in 0..width {
                     self.layer_1.print_point_color_at(
                         (j + at_x) as usize,
@@ -143,13 +151,11 @@ impl Graphics {
                         ),
                     );
                     bytenr = bytenr - 3;
-                    if j == (width - 1) {
-                        bytenr = bytenr - pixel_rest;
-                    }
                 }
             },
             RotDirection::r_270 => for i in 0..rot_height {
-                bytenr = pixels_start + ((width - 1) * 3 * height) + 3 * i;
+                bytenr = pixels_start + (height - 1) * (3 * width + pixel_rest) + i * 3;
+
                 for j in 0..rot_width {
                     self.layer_1.print_point_color_at(
                         (j + at_x) as usize,
@@ -160,9 +166,9 @@ impl Graphics {
                             pic[(bytenr) as usize],
                         ),
                     );
-                    if bytenr > (width * 3) {
-                        bytenr = bytenr - width * 3;
-                    }
+                    if bytenr >((3 * width) + pixel_rest) {
+                    bytenr = bytenr - (3 * width) - pixel_rest;
+                    };
                 }
             },
         }
@@ -211,18 +217,29 @@ impl Graphics {
         for i in 0..height {
             bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
             for j in 0..width {
-                // println!("{}",bytenr );
+                if pic[(bytenr + 2) as usize]>245 && pic[(bytenr + 1) as usize]>245 && pic[(bytenr) as usize]>245{
+
+                }
+                else{
                 self.layer_2.print_point_color_at(
                     (j + at_x) as usize,
                     (at_y + i) as usize,
-                    lcd::Color::rgb(
+                    lcd::Color::rgba(
                         pic[(bytenr + 2) as usize],
                         pic[(bytenr + 1) as usize],
                         pic[(bytenr) as usize],
+                        pic[(bytenr) as usize],
                     ),
-                );
+                );}
                 bytenr = bytenr + 3;
             }
         }
+    }
+    pub fn print_pause_screen(&mut self){  
+        self.print_bmp_at_layer2(pause_screen_top, 100+8, 6);
+        self.print_bmp_at_layer2(pause_screen_resume, 100+8+90, 139+6);
+        self.print_bmp_at_layer2(pause_screen_new_game, 100+8+78, 192+6);
+
+
     }
 }

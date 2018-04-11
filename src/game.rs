@@ -310,15 +310,16 @@ impl Game {
     pub fn move_snake(&mut self) {
         let touches = self.get_touches();
         if touches.len() == 1 {
-            for touch in touches {
-                let mut x = touch.0;
-                let mut y = touch.1;
+            let mut touch = touches[0];
+            let mut x = touch.0;
+            let mut y = touch.1;
 
-                if x < 70 {
-                    self.turn_left();
-                } else if x > 410 {
-                    self.turn_right();
-                }
+            if x < 100 {
+                self.turn_left();
+            } else if x > 380 {
+                self.turn_right();
+            } else if x > 100 && x < 380 {
+                self.pause_game();
             }
         } else {
             self.move_straight();
@@ -414,5 +415,97 @@ impl Game {
                 );
             }
         }
+    }
+
+    fn pause_game(&mut self) {
+        self.graphics.print_pause_screen();
+        let mut pause = true;
+        let mut new_game = false;
+        loop {
+            let touches = self.get_touches();
+
+            if touches.len() == 1 {
+                for touch in touches {
+                    let mut x = touch.0;
+                    let mut y = touch.1;
+
+                    if (x > 100 + 8 + 90 && x < 100 + 8 + 90 + 100)
+                        && (y > 6 + 139 && y < 6 + 139 + 30)
+                    {
+                        pause = false;
+                        break;
+                    }
+                    if (x > 100 + 8 + 78 && x < 100 + 8 + 90 + 120)
+                        && (y > 6 + 192 && y < 6 + 192 + 30)
+                    {
+                        new_game = true;
+                        break;
+                    }
+                }
+            }
+            if !pause {
+                self.graphics.layer_2.clear();
+                break;
+            }
+            if new_game {
+                self.graphics.layer_2.clear();
+                 self.graphics.layer_1.clear();
+                break;
+            }
+        }
+        if new_game {
+            self.reset();
+        }
+    }
+    pub fn game_start_up(&mut self) {
+        self.graphics.print_bmp_at_with_rotaion(
+            self::graphics::welcome_screen_base,
+            0,
+            0,
+            graphics::RotDirection::r_0,
+        );
+
+        let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game";
+
+        for c in welcome.chars() {
+            if c == ' ' || c == '-' || c == '!' {
+                print!("{}", c);
+            // system_clock::wait(10);
+            } else {
+                self.graphics.print_bmp_at_downwards(
+                    self::graphics::welcome_screen_open_mouth,
+                    188,
+                    85,
+                );
+
+                print!("{}", c);
+                system_clock::wait(10);
+                self.graphics.print_bmp_at_downwards(
+                    self::graphics::welcome_screen_closed_mouth,
+                    188,
+                    85,
+                );
+            }
+        }
+        loop {
+            let touches = self.get_touches();
+            let mut pause = true;
+            if touches.len() == 1 {
+                self.graphics.layer_1.clear();
+                self.graphics.layer_2.clear();
+                break;
+            }
+        }
+    }
+    pub fn reset(&mut self) {
+        let game_width = WIDTH / GRID_BLOCK_SIZE;
+        let game_height = HEIGHT / GRID_BLOCK_SIZE;
+        self.grid = vec![vec![Tile::Empty; game_height]; game_width];
+        self.grid[25][10] = Tile::SnakeHead(Direction::right);
+        self.snake_head_position = (25, 10);
+        self.snake_body_position = vec![(24, 10), (23, 10), (22, 10)];
+        self.snake_tail_position = (21, 10);
+        self.former_snake_tail = (20, 10);
+        self.apple_position = (10, 10);
     }
 }

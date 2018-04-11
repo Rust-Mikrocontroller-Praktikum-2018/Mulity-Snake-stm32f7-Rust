@@ -135,35 +135,8 @@ fn main(hw: board::Hardware) -> ! {
 }
 
 fn gameloop(mut game: game::Game) -> ! {
-    // Define Pictures
-    // let pic1: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
-    // let pic2: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
-    // let pic3: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
-    // game.graphics
-    //     .print_bmp_at_with_rotaion(pic1, 0, 0, graphics::RotDirection::r_0);
-    // game.graphics.print_bmp_at_layer2(pic2, 300, 0);
+//    game.game_start_up();
 
-    // let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game";
-
-    // for c in welcome.chars() {
-    //     if c == ' ' || c == '-' || c == '!' {
-    //         print!("{}", c);
-    //         system_clock::wait(10);
-    //     } else {
-    //         game.graphics.print_bmp_at_downwards(pic2, 188, 85);
-    //         print!("{}", c);
-    //         //system_clock::wait(10);
-    //         game.graphics.print_bmp_at_downwards(pic3, 188, 85);
-    //     }
-    // }
-    // game.graphics.print_bmp_at_with_rotaion(pic, 0, 0, graphics::RotDirection::r_0);
-    // game.graphics.print_bmp_at_with_rotaion(pic, 85, 0, graphics::RotDirection::r_90);
-    // game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);
-    // game.graphics.print_bmp_at_with_rotaion(pic, 260, 0, graphics::RotDirection::r_270);
-    /* Random Example */
-    // let ran = game.random_gen.random_range(0, 42);
-    // println!("A random number: 0 <= {} < 42!!!", ran);
-    game.set_backround_color();
     loop {
         // let ticks = system_clock::ticks();
         game.move_snake();
