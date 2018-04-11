@@ -8,15 +8,19 @@ extern crate stm32f7_discovery as stm32f7;
 
 pub struct Random {
     rng: stm32f7::random::Rng,
+    rcc: &'static mut stm32f7::board::rcc::Rcc,
 }
 
 impl Random {
     pub fn new(
         rng: &'static mut stm32f7::board::rng::Rng,
-        rcc: &mut stm32f7::board::rcc::Rcc,
+        rcc: &'static mut stm32f7::board::rcc::Rcc,
     ) -> Random {
         let random_gen = stm32f7::random::Rng::init(rng, rcc).unwrap();
-        Random { rng: random_gen }
+        Random {
+            rng: random_gen,
+            rcc: rcc,
+        }
     }
 
     /**
@@ -106,14 +110,14 @@ impl Random {
      * Test this Random functions. pls enable semihosting.
      * example:
      * let mut random_gen = random::Random::new(rng, rcc);
-     * random_gen = random::Random::test_me(random_gen, 1000, false);
-     * random_gen.disable(rcc);
+     * random_gen.test_me(10, true);
+     * random_gen.disable();
      */
-    pub fn test_me(mut random_gen: Random, iterations: usize, hrpintln: bool) -> Random {
+    pub fn test_me(&mut self, iterations: usize, hrpintln: bool) {
         let mut counter = 0;
         let mut from = 0;
         let mut to = u32::max_value();
-        let mut r = random_gen.random_range(from, to);
+        let mut r = self.random_range(from, to);
         if hrpintln {
             hprintln!("{} <= {} < {} | counter={}", from, r, to, counter);
             hprintln!("----------------------------");
@@ -124,7 +128,7 @@ impl Random {
         counter += 1;
         from = 1;
         to = u32::max_value();
-        r = random_gen.random_range(from, to);
+        r = self.random_range(from, to);
         if hrpintln {
             hprintln!("{} <= {} < {} | counter={}", from, r, to, counter);
             hprintln!("----------------------------");
@@ -135,7 +139,7 @@ impl Random {
         counter += 1;
         from = 10;
         to = u32::max_value() - 1;
-        r = random_gen.random_range(from, to);
+        r = self.random_range(from, to);
         if hrpintln {
             hprintln!("{} <= {} < {} | counter={}", from, r, to, counter);
             hprintln!("----------------------------");
@@ -146,7 +150,7 @@ impl Random {
         counter += 1;
         from = 1;
         to = 3;
-        r = random_gen.random_range(from, to);
+        r = self.random_range(from, to);
         if hrpintln {
             hprintln!("{} <= {} < {} | counter={}", from, r, to, counter);
             hprintln!("----------------------------");
@@ -160,7 +164,7 @@ impl Random {
             assert!(from < to);
 
             counter += 1;
-            r = random_gen.random_range(from, to);
+            r = self.random_range(from, to);
             if hrpintln {
                 hprintln!("{} <= {} < {} | counter={}", from, r, to, counter);
                 hprintln!("----------------------------");
@@ -168,21 +172,20 @@ impl Random {
             assert!(from <= r);
             assert!(r < to);
 
-            from = random_gen.rng.poll_and_get().unwrap();
-            to = random_gen.rng.poll_and_get().unwrap();
+            from = self.rng.poll_and_get().unwrap();
+            to = self.rng.poll_and_get().unwrap();
             while !(from < to) {
-                from = random_gen.rng.poll_and_get().unwrap();
-                to = random_gen.rng.poll_and_get().unwrap();
+                from = self.rng.poll_and_get().unwrap();
+                to = self.rng.poll_and_get().unwrap();
             }
         }
-        random_gen
     }
 
     /**
      * Since for disabling the rng, some rcc clock on the AHB2 Bus must be disabled as well.
      * Therefore use .disable(rcc) after you are done.
      */
-    pub fn disable(mut self, rcc: &mut stm32f7::board::rcc::Rcc) {
-        self.rng.disable(rcc);
+    pub fn disable(mut self) {
+        self.rng.disable(self.rcc);
     }
 }

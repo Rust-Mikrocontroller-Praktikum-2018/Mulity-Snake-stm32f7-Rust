@@ -128,8 +128,9 @@ fn main(hw: board::Hardware) -> ! {
     /* ETHERNET END */
     // l0et layer2 = lcd::Layer<lcd::FramebufferAl88>;
 
+    let random_gen = random::Random::new(rng, rcc);
     // Initialize Game
-    let mut game = game::Game::new(graphics, i2c_3);
+    let mut game = game::Game::new(graphics, i2c_3, random_gen);
     gameloop(game);
 }
 
@@ -142,7 +143,7 @@ fn gameloop(mut game: game::Game) -> ! {
         .print_bmp_at_with_rotaion(pic1, 0, 0, graphics::RotDirection::r_0);
     game.graphics.print_bmp_at_layer2(pic2, 300, 0);
 
-    let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game";
+    let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game\n";
 
     for c in welcome.chars() {
         if c == ' ' || c == '-' || c == '!' {
@@ -159,6 +160,9 @@ fn gameloop(mut game: game::Game) -> ! {
     // game.graphics.print_bmp_at_with_rotaion(pic, 85, 0, graphics::RotDirection::r_90);
     // game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);
     // game.graphics.print_bmp_at_with_rotaion(pic, 260, 0, graphics::RotDirection::r_270);
+    /* Random Example */
+    let ran = game.random_gen.random_range(0, 42);
+    println!("A random number: 0 <= {} < 42!!!", ran);
     loop {
         // let ticks = system_clock::ticks();
         game.move_snake();
