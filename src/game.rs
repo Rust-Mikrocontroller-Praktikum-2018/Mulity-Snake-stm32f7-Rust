@@ -10,6 +10,7 @@ extern crate stm32f7_discovery as stm32f7; // initialization routines for .data 
 
 use alloc::Vec;
 use graphics;
+use random;
 use stm32f7::{lcd, touch};
 
 use super::HEIGHT;
@@ -22,6 +23,7 @@ const GRID_BLOCK_SIZE: usize = 10;
  */
 pub struct Game {
     pub graphics: graphics::Graphics,
+    pub random_gen: random::Random,
     grid: Vec<Vec<Tile>>,
     i2c_3: stm32f7::i2c::I2C,
     pub snake_head_position: (usize, usize),
@@ -54,11 +56,16 @@ impl Game {
     /**
      * Create a new game.
      */
-    pub fn new(graphics: graphics::Graphics, i2c_3: stm32f7::i2c::I2C) -> Game {
+    pub fn new(
+        graphics: graphics::Graphics,
+        i2c_3: stm32f7::i2c::I2C,
+        random_gen: random::Random,
+    ) -> Game {
         let game_width = WIDTH / GRID_BLOCK_SIZE;
         let game_height = HEIGHT / GRID_BLOCK_SIZE;
         let mut return_game = Game {
             graphics: graphics,
+            random_gen: random_gen,
             grid: vec![vec![Tile::Empty; game_height]; game_width],
             i2c_3: i2c_3,
             snake_head_position: (25, 10),

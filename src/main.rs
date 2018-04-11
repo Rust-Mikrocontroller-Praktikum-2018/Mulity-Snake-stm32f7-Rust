@@ -21,6 +21,7 @@ use stm32f7::{board, embedded, ethernet, exceptions, lcd, sdram, system_clock, t
 
 mod game;
 mod graphics;
+mod random;
 
 pub const HEIGHT: usize = 272;
 pub const WIDTH: usize = 480;
@@ -73,6 +74,7 @@ fn main(hw: board::Hardware) -> ! {
         ethernet_mac,
         ethernet_dma,
         i2c_3,
+        rng,
         ..
     } = hw;
 
@@ -126,8 +128,9 @@ fn main(hw: board::Hardware) -> ! {
     /* ETHERNET END */
     // l0et layer2 = lcd::Layer<lcd::FramebufferAl88>;
 
+    let random_gen = random::Random::new(rng, rcc);
     // Initialize Game
-    let mut game = game::Game::new(graphics, i2c_3);
+    let mut game = game::Game::new(graphics, i2c_3, random_gen);
     gameloop(game);
 }
 
@@ -157,11 +160,10 @@ fn gameloop(mut game: game::Game) -> ! {
     // game.graphics.print_bmp_at_with_rotaion(pic, 85, 0, graphics::RotDirection::r_90);
     // game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);
     // game.graphics.print_bmp_at_with_rotaion(pic, 260, 0, graphics::RotDirection::r_270);
-
-    // start game
-
+    /* Random Example */
+    let ran = game.random_gen.random_range(0, 42);
+    println!("A random number: 0 <= {} < 42!!!", ran);
     game.set_backround_color();
-
     loop {
         // let ticks = system_clock::ticks();
         game.move_snake();
