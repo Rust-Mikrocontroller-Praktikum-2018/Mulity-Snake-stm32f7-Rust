@@ -123,13 +123,18 @@ fn main(hw: board::Hardware) -> ! {
     /* ETHERNET START */
 
     /* ETHERNET END */
+    // l0et layer2 = lcd::Layer<lcd::FramebufferAl88>;
 
-    let pic: &[u8] = include_bytes!("../assets/Test7.bmp");
-    graphics.print_bmp_at_with_rotaion(pic, 0, 0, graphics::RotDirection::r_270);
+    
+
     gameloop(graphics);
 }
 
 fn gameloop(mut graphics: graphics::Graphics) -> ! {
+    // Define Pictures 
+        let pic1: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
+    let pic2: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
+    let pic3: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
     // Define Colors
     let red = lcd::Color {
         red: 255,
@@ -149,6 +154,7 @@ fn gameloop(mut graphics: graphics::Graphics) -> ! {
         blue: 255,
         alpha: 255,
     };
+
     // For iterating colors
     let colors = [red, green, blue];
     let mut chosen_color = 0; // colors[chosen_color];
@@ -157,8 +163,35 @@ fn gameloop(mut graphics: graphics::Graphics) -> ! {
     let mut y = 0;
     // Initialize Game
     let mut game = game::Game::new(graphics);
+
+    graphics.print_bmp_at_with_rotaion(pic1, 0, 0, graphics::RotDirection::r_0);
+    graphics.print_bmp_at_layer2(pic2, 300, 0);
+
+    let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game";
+
+        for c in welcome.chars() {
+            if c == ' ' || c == '-' || c == '!' {
+                print!("{}", c);
+                system_clock::wait(10);
+            } else {
+                graphics.print_bmp_at_downwards(pic2, 188, 85);
+                print!("{}", c);
+                //system_clock::wait(10);
+                graphics.print_bmp_at_downwards(pic3, 188, 85);
+            }
+        }
+        // let layer = graphics.Graphics.layer_2;
+        // layer.clear();
+        
+    // loop{
+    //     for touch in &touch::touches(&mut i2c_3).unwrap() {
+                
+    //             }
+    // }
+
     loop {
         // let ticks = system_clock::ticks();
+
         game.draw_game();
         system_clock::wait(10);
     }

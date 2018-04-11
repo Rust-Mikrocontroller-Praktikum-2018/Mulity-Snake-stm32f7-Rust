@@ -58,39 +58,45 @@ impl Graphics {
             }
         }
     }
-    
+
+    // pub fn print_string_at(&mut self,x:usize,y:usize,string: &str){
+    //     let text = TextWriter{font_renderer: TTF ,x_pos: x, y_pos: y};
+    //     text.layer(&self).write_str(string);
+
+    // }
     /**
      * prints a pixels from a slice of a bitmap at position x,y on layer1 with rotation of 0,90,180,270 degree
+     * Bitmaps need to be in 24bit color depth and uncompressed
      */
-    pub fn print_bmp_at_with_rotaion(
-        &mut self,
-        pic: &[u8],
-        x: u32,
-        y: u32,
-        rot: RotDirection,
-    ) {
-
-        
+    pub fn print_bmp_at_with_rotaion(&mut self, pic: &[u8], x: u32, y: u32, rot: RotDirection) {
         let pixels_start = pic[10] as u32;
         let width = (pic[18] as u32) + ((pic[19] as u32) * 256_u32);
         let height = (pic[22] as u32) + ((pic[23] as u32) * 256_u32);
+        let pixel_rest = width % 4; // If width isn't dividable by 4 the lines are filled with bytes of zeros
 
         let rot_width = height;
         let rot_height = width;
-        
-        let at_x=x;
-        let mut at_y=y;
+
+        let at_x = x;
+        let mut at_y = y;
         let mut bytenr: u32 = pixels_start;
         let pic_length: u32 = pic.len() as u32;
-        
-        match rot {
-            RotDirection::r_0 => {at_y=y+height;},
-            RotDirection::r_90 => {at_y=y+rot_height;},
-            RotDirection::r_180 => {at_y=y+height;
-                                    bytenr= pic_length - 1;},
-            RotDirection::r_270 => {at_y=y+rot_height;},
-        }
 
+        match rot {
+            RotDirection::r_0 => {
+                at_y = y + height;
+            }
+            RotDirection::r_90 => {
+                at_y = y + rot_height;
+            }
+            RotDirection::r_180 => {
+                at_y = y + height;
+                bytenr = pic_length - 1;
+            }
+            RotDirection::r_270 => {
+                at_y = y + rot_height;
+            }
+        }
 
         match rot {
             RotDirection::r_0 => for i in 0..height {
@@ -105,10 +111,13 @@ impl Graphics {
                         ),
                     );
                     bytenr = bytenr + 3;
+                    if j == (width - 1) {
+                        bytenr = bytenr + pixel_rest;
+                    }
                 }
             },
             RotDirection::r_90 => for i in 0..rot_height {
-                bytenr = pixels_start + width * 3 - 3 * (i + 1);
+                bytenr = pixels_start + width * 3 - 3 * (i + 1) - pixel_rest;
                 for j in 0..rot_width {
                     self.layer_1.print_point_color_at(
                         (j + at_x) as usize,
@@ -119,7 +128,7 @@ impl Graphics {
                             pic[(bytenr) as usize],
                         ),
                     );
-                    bytenr = bytenr + width * 3;
+                    bytenr = bytenr + width * 3 + pixel_rest;
                 }
             },
             RotDirection::r_180 => for i in 0..height {
@@ -128,12 +137,15 @@ impl Graphics {
                         (j + at_x) as usize,
                         (at_y - i) as usize,
                         lcd::Color::rgb(
-                            pic[(bytenr -2) as usize],
-                            pic[(bytenr - 1) as usize],
                             pic[(bytenr) as usize],
+                            pic[(bytenr - 1) as usize],
+                            pic[(bytenr - 2) as usize],
                         ),
                     );
                     bytenr = bytenr - 3;
+                    if j == (width - 1) {
+                        bytenr = bytenr - pixel_rest;
+                    }
                 }
             },
             RotDirection::r_270 => for i in 0..rot_height {
@@ -153,6 +165,64 @@ impl Graphics {
                     }
                 }
             },
+        }
+    }
+    pub fn print_bmp_at_downwards(&mut self, pic: &[u8], x: u32, y: u32) {
+        let pixels_start = pic[10] as u32;
+        let width = (pic[18] as u32) + ((pic[19] as u32) * 256_u32);
+        let height = (pic[22] as u32) + ((pic[23] as u32) * 256_u32);
+        let pixel_rest = width % 4;
+
+        let at_x = x;
+        let mut at_y = y;
+        let mut bytenr: u32 = pixels_start;
+        let pixel_end: u32 = pic.len() as u32 - 1;
+        // println!("{},{}",pixel_rest,pixel_end );
+
+        for i in 0..height {
+            bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
+            for j in 0..width {
+                // println!("{}",bytenr );
+                self.layer_1.print_point_color_at(
+                    (j + at_x) as usize,
+                    (at_y + i) as usize,
+                    lcd::Color::rgb(
+                        pic[(bytenr + 2) as usize],
+                        pic[(bytenr + 1) as usize],
+                        pic[(bytenr) as usize],
+                    ),
+                );
+                bytenr = bytenr + 3;
+            }
+        }
+    }
+    pub fn print_bmp_at_layer2(&mut self, pic: &[u8], x: u32, y: u32) {
+        let pixels_start = pic[10] as u32;
+        let width = (pic[18] as u32) + ((pic[19] as u32) * 256_u32);
+        let height = (pic[22] as u32) + ((pic[23] as u32) * 256_u32);
+        let pixel_rest = width % 4;
+
+        let at_x = x;
+        let mut at_y = y;
+        let mut bytenr: u32 = pixels_start;
+        let pixel_end: u32 = pic.len() as u32 - 1;
+        // println!("{},{}",pixel_rest,pixel_end );
+
+        for i in 0..height {
+            bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
+            for j in 0..width {
+                // println!("{}",bytenr );
+                self.layer_2.print_point_color_at(
+                    (j + at_x) as usize,
+                    (at_y + i) as usize,
+                    lcd::Color::rgb(
+                        pic[(bytenr + 2) as usize],
+                        pic[(bytenr + 1) as usize],
+                        pic[(bytenr) as usize],
+                    ),
+                );
+                bytenr = bytenr + 3;
+            }
         }
     }
 }
