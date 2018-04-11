@@ -21,7 +21,7 @@ const GRID_BLOCK_SIZE: usize = 10;
  * Contains all necessary state information of a game.
  */
 pub struct Game {
-    graphics: graphics::Graphics,
+    pub graphics: graphics::Graphics,
     grid: Vec<Vec<Tile>>,
     i2c_3: stm32f7::i2c::I2C,
     snake_head_position: (usize, usize),
