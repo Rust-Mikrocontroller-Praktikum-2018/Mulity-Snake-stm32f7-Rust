@@ -119,42 +119,7 @@ fn main(hw: board::Hardware) -> ! {
 
     // Random gen
     let mut random_gen = random::Random::new(rng, rcc);
-    
-    let from = 0;
-    let to = u32::max_value();
-    let r = random_gen.random_range(from, to);
-    hprintln!("r={}", r);
-    assert!(from <= r);
-    assert!(r < to);
-    hprintln!("----------------------------");
-    let from = 1;
-    let to = u32::max_value();
-    let r = random_gen.random_range(from, to);
-    hprintln!("r={}", r);
-    assert!(from <= r);
-    assert!(r < to);
-    hprintln!("----------------------------");
-    let from = 10;
-    let to = u32::max_value() - 1;
-    let r = random_gen.random_range(from, to);
-    hprintln!("r={}", r);
-    assert!(from <= r);
-    assert!(r < to);
-    hprintln!("----------------------------");
-    let from = 1;
-    let to   = 3;
-    let r = random_gen.random_range(from, to);
-    hprintln!("r={}", r);
-    assert!(from <= r);
-    assert!(r < to);
-    hprintln!("----------------------------");
-    let from = 1;
-    let to   = 30;
-    let r = random_gen.random_range(from, to);
-    hprintln!("r={}", r);
-    assert!(from <= r);
-    assert!(r < to);
-    hprintln!("----------------------------");
+    random::Random::test_me(random_gen);
 
     /* ETHERNET START */
 
