@@ -114,34 +114,84 @@ fn main(hw: board::Hardware) -> ! {
     // lcd controller
     // let ltdc_pointer = ltdc as *mut board::ltdc::Ltdc;
     let lcd = lcd::init(ltdc, rcc, &mut gpio);
-    let graphics = graphics::Graphics::new(lcd);
+    let mut graphics = graphics::Graphics::new(lcd);
     // unsafe {
     //     (*ltdc_pointer).l1cacr.update(|r| r.set_consta(255));
     //     (*ltdc_pointer).l2cacr.update(|r| r.set_consta(255));
     // }
 
     /* ETHERNET START */
-    
+
     /* ETHERNET END */
+    // l0et layer2 = lcd::Layer<lcd::FramebufferAl88>;
+
+    
 
     gameloop(graphics);
 }
 
 fn gameloop(mut graphics: graphics::Graphics) -> ! {
+    // Define Pictures 
+        let pic1: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
+    let pic2: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
+    let pic3: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
     // Define Colors
-    let red = lcd::Color {red:255, green:0, blue:0, alpha: 255};
-    let green = lcd::Color {red:0, green:255, blue:0, alpha: 255};
-    let blue = lcd::Color {red:0, green:0, blue:255, alpha: 255};
+    let red = lcd::Color {
+        red: 255,
+        green: 0,
+        blue: 0,
+        alpha: 255,
+    };
+    let green = lcd::Color {
+        red: 0,
+        green: 255,
+        blue: 0,
+        alpha: 255,
+    };
+    let blue = lcd::Color {
+        red: 0,
+        green: 0,
+        blue: 255,
+        alpha: 255,
+    };
+
     // For iterating colors
     let colors = [red, green, blue];
     let mut chosen_color = 0; // colors[chosen_color];
-    // Coordinates to draw to
+                              // Coordinates to draw to
     let mut x = 0;
     let mut y = 0;
     // Initialize Game
     let mut game = game::Game::new(graphics);
+
+    graphics.print_bmp_at_with_rotaion(pic1, 0, 0, graphics::RotDirection::r_0);
+    graphics.print_bmp_at_layer2(pic2, 300, 0);
+
+    let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game";
+
+        for c in welcome.chars() {
+            if c == ' ' || c == '-' || c == '!' {
+                print!("{}", c);
+                system_clock::wait(10);
+            } else {
+                graphics.print_bmp_at_downwards(pic2, 188, 85);
+                print!("{}", c);
+                //system_clock::wait(10);
+                graphics.print_bmp_at_downwards(pic3, 188, 85);
+            }
+        }
+        // let layer = graphics.Graphics.layer_2;
+        // layer.clear();
+        
+    // loop{
+    //     for touch in &touch::touches(&mut i2c_3).unwrap() {
+                
+    //             }
+    // }
+
     loop {
         // let ticks = system_clock::ticks();
+
         game.draw_game();
         system_clock::wait(10);
     }
