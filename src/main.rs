@@ -117,9 +117,6 @@ fn main(hw: board::Hardware) -> ! {
     let lcd = lcd::init(ltdc, rcc, &mut gpio);
     let graphics = graphics::Graphics::new(lcd);
 
-    // Random gen
-    let mut random_gen = random::Random::new(rng, rcc);
-    random::Random::test_me(random_gen);
 
     /* ETHERNET START */
 
