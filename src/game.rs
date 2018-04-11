@@ -24,8 +24,8 @@ pub struct Game {
     pub graphics: graphics::Graphics,
     grid: Vec<Vec<Tile>>,
     i2c_3: stm32f7::i2c::I2C,
-    snake_head_position: (usize, usize),
-    snake_body_position: Vec<(usize, usize)>,
+    pub snake_head_position: (usize, usize),
+    pub snake_body_position: Vec<(usize, usize)>,
     snake_tail_position: (usize, usize),
     former_snake_tail: (usize, usize),
     apple_position: (usize, usize),
@@ -122,10 +122,10 @@ impl Game {
                 self.former_snake_tail.1 * GRID_BLOCK_SIZE,
                 GRID_BLOCK_SIZE - 1,
                 lcd::Color {
-                    red: 0,
-                    green: 0,
-                    blue: 0,
-                    alpha: 255,
+                    red: 255,
+                    green: 255,
+                    blue: 255,
+                    alpha: 0,
                 },
             );
         }
@@ -149,104 +149,80 @@ impl Game {
      * Moves position of the snake in chosen direction.
      */
     fn move_up(&mut self) {
-        for x in 0..self.grid.len() - 1 {
-            for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y]
-                    == self.grid[self.snake_head_position.0][self.snake_head_position.1]
-                {
-                    self.grid[x][y - 1] = Tile::SnakeHead(Direction::up);
-                    self.grid[x][y] = Tile::Empty;
-                    self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position =
-                        self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len() - 1).rev() {
-                        self.snake_body_position[z + 1] = self.snake_body_position[z];
-                    }
-                    self.snake_body_position[0] = self.snake_head_position;
-                    self.snake_head_position.1 = y - 1;
+        let x = self.snake_head_position.0;
+        let y = self.snake_head_position.1;
 
-                    return;
-                }
-            }
+        self.grid[x][y - 1] = Tile::SnakeHead(Direction::up);
+        self.grid[x][y] = Tile::Empty;
+        self.former_snake_tail = self.snake_tail_position;
+        self.snake_tail_position = self.snake_body_position[self.snake_body_position.len() - 1];
+        for z in (0..self.snake_body_position.len() - 1).rev() {
+            self.snake_body_position[z + 1] = self.snake_body_position[z];
         }
+        self.snake_body_position[0] = self.snake_head_position;
+        self.snake_head_position.1 = y - 1;
+
+        return;
     }
 
     /**
      * Moves position of the snake in chosen direction.
      */
     fn move_down(&mut self) {
-        for x in 0..self.grid.len() - 1 {
-            for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y]
-                    == self.grid[self.snake_head_position.0][self.snake_head_position.1]
-                {
-                    self.grid[x][y + 1] = Tile::SnakeHead(Direction::down);
-                    self.grid[x][y] = Tile::Empty;
-                    self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position =
-                        self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len() - 1).rev() {
-                        self.snake_body_position[z + 1] = self.snake_body_position[z];
-                    }
-                    self.snake_body_position[0] = self.snake_head_position;
-                    self.snake_head_position.1 = y + 1;
+        let x = self.snake_head_position.0;
+        let y = self.snake_head_position.1;
 
-                    return;
-                }
-            }
+        self.grid[x][y + 1] = Tile::SnakeHead(Direction::down);
+        self.grid[x][y] = Tile::Empty;
+        self.former_snake_tail = self.snake_tail_position;
+        self.snake_tail_position = self.snake_body_position[self.snake_body_position.len() - 1];
+        for z in (0..self.snake_body_position.len() - 1).rev() {
+            self.snake_body_position[z + 1] = self.snake_body_position[z];
         }
+        self.snake_body_position[0] = self.snake_head_position;
+        self.snake_head_position.1 = y + 1;
+
+        return;
     }
 
     /**
      * Moves position of the snake in chosen direction.
      */
     fn move_right(&mut self) {
-        for x in 0..self.grid.len() - 1 {
-            for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y]
-                    == self.grid[self.snake_head_position.0][self.snake_head_position.1]
-                {
-                    self.grid[x + 1][y] = Tile::SnakeHead(Direction::right);
-                    self.grid[x][y] = Tile::Empty;
-                    self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position =
-                        self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len() - 1).rev() {
-                        self.snake_body_position[z + 1] = self.snake_body_position[z];
-                    }
-                    self.snake_body_position[0] = self.snake_head_position;
-                    self.snake_head_position.0 = x + 1;
+        let x = self.snake_head_position.0;
+        let y = self.snake_head_position.1;
 
-                    return;
-                }
-            }
+        self.grid[x + 1][y] = Tile::SnakeHead(Direction::right);
+        self.grid[x][y] = Tile::Empty;
+        self.former_snake_tail = self.snake_tail_position;
+        self.snake_tail_position = self.snake_body_position[self.snake_body_position.len() - 1];
+        for z in (0..self.snake_body_position.len() - 1).rev() {
+            self.snake_body_position[z + 1] = self.snake_body_position[z];
         }
+        self.snake_body_position[0] = self.snake_head_position;
+        self.snake_head_position.0 = x + 1;
+
+        return;
     }
 
     /**
      * Moves position of the snake in chosen direction.
      */
     fn move_left(&mut self) {
-        for x in 0..self.grid.len() - 1 {
-            for y in 0..self.grid[0].len() - 1 {
-                if self.grid[x][y]
-                    == self.grid[self.snake_head_position.0][self.snake_head_position.1]
-                {
-                    self.grid[x - 1][y] = Tile::SnakeHead(Direction::left);
-                    self.grid[x][y] = Tile::Empty;
-                    self.former_snake_tail = self.snake_tail_position;
-                    self.snake_tail_position =
-                        self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len() - 1).rev() {
-                        self.snake_body_position[z + 1] = self.snake_body_position[z];
-                    }
-                    self.snake_body_position[0] = self.snake_head_position;
-                    self.snake_head_position.0 = x - 1;
+        let x = self.snake_head_position.0;
+        let y = self.snake_head_position.1;
 
-                    return;
-                }
-            }
+        self.grid[x - 1][y] = Tile::SnakeHead(Direction::left);
+        self.grid[x][y] = Tile::Empty;
+        self.former_snake_tail = self.snake_tail_position;
+        self.snake_tail_position = self.snake_body_position[self.snake_body_position.len() - 1];
+        for z in (0..self.snake_body_position.len() - 1).rev() {
+            self.snake_body_position[z + 1] = self.snake_body_position[z];
         }
+        self.snake_body_position[0] = self.snake_head_position;
+        self.snake_head_position.0 = x - 1;
+
+        return;
     }
 
     /**
@@ -353,10 +329,11 @@ impl Game {
                                              // missing random apple position
         }
     }
+
     /**
      * returns touches array
      */
-    fn get_touches(&mut self) -> Vec<(u16, u16)> {
+    pub fn get_touches(&mut self) -> Vec<(u16, u16)> {
         // &touch::touches(&mut self.i2c_3).unwrap()
         let mut touches = Vec::new();
         for touch in &touch::touches(&mut self.i2c_3).unwrap() {
@@ -364,5 +341,61 @@ impl Game {
             touches.push((touch.x, touch.y));
         }
         touches
+    }
+
+    /**
+     * returns touches array
+     */
+    pub fn check_grid_edge(&mut self) {
+        if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::right) && self.snake_head_position.0 == 46
+        {
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
+            self.snake_head_position.0 = 1;
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] =
+                Tile::SnakeHead(Direction::right);
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::left) && self.snake_head_position.0 == 1
+        {
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
+            self.snake_head_position.0 = 46;
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] =
+                Tile::SnakeHead(Direction::left);
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::up) && self.snake_head_position.1 == 1
+        {
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
+            self.snake_head_position.1 = 26;
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] =
+                Tile::SnakeHead(Direction::up);
+        } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
+            == Tile::SnakeHead(Direction::down)
+            && self.snake_head_position.1 == 26
+        {
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
+            self.snake_head_position.1 = 1;
+            self.grid[self.snake_head_position.0][self.snake_head_position.1] =
+                Tile::SnakeHead(Direction::down);
+        }
+    }
+    /**
+     * set backround color
+     */
+    pub fn set_backround_color(&mut self) {
+        for x in 0..WIDTH {
+            for y in 0..HEIGHT {
+                self.graphics.print_square_size_color_at(
+                    x,
+                    y,
+                    1,
+                    lcd::Color {
+                        red: 0,
+                        green: 0,
+                        blue: 0,
+                        alpha: 255,
+                    },
+                );
+            }
+        }
     }
 }
