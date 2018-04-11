@@ -159,7 +159,7 @@ impl Game {
                     self.former_snake_tail = self.snake_tail_position;
                     self.snake_tail_position =
                         self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len()-1).rev() {
+                    for z in (0..self.snake_body_position.len() - 1).rev() {
                         self.snake_body_position[z + 1] = self.snake_body_position[z];
                     }
                     self.snake_body_position[0] = self.snake_head_position;
@@ -185,7 +185,7 @@ impl Game {
                     self.former_snake_tail = self.snake_tail_position;
                     self.snake_tail_position =
                         self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len()-1).rev() {
+                    for z in (0..self.snake_body_position.len() - 1).rev() {
                         self.snake_body_position[z + 1] = self.snake_body_position[z];
                     }
                     self.snake_body_position[0] = self.snake_head_position;
@@ -211,7 +211,7 @@ impl Game {
                     self.former_snake_tail = self.snake_tail_position;
                     self.snake_tail_position =
                         self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len()-1).rev() {
+                    for z in (0..self.snake_body_position.len() - 1).rev() {
                         self.snake_body_position[z + 1] = self.snake_body_position[z];
                     }
                     self.snake_body_position[0] = self.snake_head_position;
@@ -237,7 +237,7 @@ impl Game {
                     self.former_snake_tail = self.snake_tail_position;
                     self.snake_tail_position =
                         self.snake_body_position[self.snake_body_position.len() - 1];
-                    for z in (0..self.snake_body_position.len()-1).rev() {
+                    for z in (0..self.snake_body_position.len() - 1).rev() {
                         self.snake_body_position[z + 1] = self.snake_body_position[z];
                     }
                     self.snake_body_position[0] = self.snake_head_position;
@@ -345,14 +345,13 @@ impl Game {
     /**
      * checks if snake bites
      */
-    pub fn snake_bite(&mut self){
-         if self.snake_head_position == self.apple_position {
-                self.snake_body_position.push(self.snake_tail_position);
-                self.snake_tail_position = self.former_snake_tail;
-                self.former_snake_tail = (0, 0); // has to be improved
-                println!("{}", self.snake_body_position[self.snake_body_position.len()-1].0);
-                // missing random apple position
-            }
+    pub fn snake_bite(&mut self) {
+        if self.snake_head_position == self.apple_position {
+            self.snake_body_position.push(self.snake_tail_position);
+            self.snake_tail_position = self.former_snake_tail;
+            self.former_snake_tail = (0, 0); // has to be improved
+                                             // missing random apple position
+        }
     }
     /**
      * returns touches array
