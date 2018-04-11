@@ -11,7 +11,7 @@ extern crate stm32f7_discovery as stm32f7; // initialization routines for .data 
 use alloc::Vec;
 use graphics;
 use random;
-use stm32f7::{lcd, touch};
+use stm32f7::{lcd, touch,system_clock};
 
 use super::HEIGHT;
 use super::WIDTH;
