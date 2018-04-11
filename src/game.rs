@@ -427,6 +427,7 @@ impl Game {
                     188,
                     85,
                 );
+
                 print!("{}", c);
                 system_clock::wait(10);
                 self.graphics.print_bmp_at_downwards(
