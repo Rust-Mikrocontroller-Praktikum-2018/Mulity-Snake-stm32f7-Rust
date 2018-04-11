@@ -45,7 +45,7 @@ impl Graphics {
         graphics.layer_2.clear();
         graphics
             .lcd
-            .set_background_color(lcd::Color::from_hex(0x000000));
+            .set_background_color(lcd::Color::from_hex(0x0000));
         graphics
     }
 
