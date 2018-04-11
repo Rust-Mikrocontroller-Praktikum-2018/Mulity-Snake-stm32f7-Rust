@@ -380,9 +380,6 @@ impl Game {
         {
             self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
             self.snake_head_position.1 = HEIGHT / GRID_BLOCK_SIZE - 2;
-            hprintln!("{}", HEIGHT);
-            hprintln!("{}", GRID_BLOCK_SIZE);
-            hprintln!("{}", self.snake_head_position.1);
 
             self.grid[self.snake_head_position.0][self.snake_head_position.1] =
                 Tile::SnakeHead(Direction::up);
