@@ -21,6 +21,7 @@ use stm32f7::{board, embedded, ethernet, exceptions, lcd, sdram, system_clock, t
 
 mod game;
 mod graphics;
+mod random;
 
 pub const HEIGHT: usize = 272;
 pub const WIDTH: usize = 480;
@@ -73,6 +74,7 @@ fn main(hw: board::Hardware) -> ! {
         ethernet_mac,
         ethernet_dma,
         i2c_3,
+        rng,
         ..
     } = hw;
 
