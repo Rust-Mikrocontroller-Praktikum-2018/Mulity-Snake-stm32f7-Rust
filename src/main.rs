@@ -142,6 +142,7 @@ fn gameloop(mut game: game::Game) -> ! {
         game.move_snake();
         game.snake_bite();
         game.check_grid_edge();
+        game.check_selfbite();
         game.draw_game();
 
         system_clock::wait(100);

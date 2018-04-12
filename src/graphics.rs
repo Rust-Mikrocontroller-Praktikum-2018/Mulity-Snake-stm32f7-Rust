@@ -271,4 +271,9 @@ impl Graphics {
         self.print_bmp_at_layer2(pause_screen_resume, 100 + 8 + 90, 139 + 6);
         self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
     }
+    pub fn print_restart_screen(&mut self){  
+        self.print_bmp_at_layer2(pause_screen_top, 100+8, 6);
+        self.print_bmp_at_layer2(pause_screen_new_game, 100+8+78, 192+6);
+
+    }
 }

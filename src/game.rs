@@ -31,6 +31,7 @@ pub struct Game {
     snake_tail_position: (usize, usize),
     former_snake_tail: (usize, usize),
     apple_position: (usize, usize),
+    pub apple_counter: usize,
 }
 
 /**
@@ -73,6 +74,7 @@ impl Game {
             snake_tail_position: (21, 10),
             former_snake_tail: (20, 10),
             apple_position: (10, 10),
+            apple_counter: 0,
         };
         return_game.grid[25][10] = Tile::SnakeHead(Direction::right);
         return_game
@@ -134,9 +136,9 @@ impl Game {
             self.snake_tail_position.1 * GRID_BLOCK_SIZE,
             GRID_BLOCK_SIZE - 1,
             lcd::Color {
-                red: 0,
+                red: 255,
                 green: 0,
-                blue: 255,
+                blue: 0,
                 alpha: 255,
             },
         );
@@ -366,6 +368,7 @@ impl Game {
             let y = self.random_gen
                 .random_range(1, HEIGHT as u32 / GRID_BLOCK_SIZE as u32 - 1);
             self.apple_position = (x as usize, y as usize);
+            self.apple_counter = self.apple_counter + 1;
         }
     }
 
@@ -481,6 +484,48 @@ impl Game {
             self.reset();
         }
     }
+
+    fn restart_game(&mut self) {
+        self.graphics.print_restart_screen();
+        println!("    score: {}",self.apple_counter);
+        let mut pause = true;
+        let mut new_game = false;
+        loop {
+            let touches = self.get_touches();
+
+            if touches.len() == 1 {
+                for touch in touches {
+                    let mut x = touch.0;
+                    let mut y = touch.1;
+
+                    if (x > 100 + 8 + 90 && x < 100 + 8 + 90 + 100)
+                        && (y > 6 + 139 && y < 6 + 139 + 30)
+                    {
+                        pause = false;
+                        break;
+                    }
+                    if (x > 100 + 8 + 78 && x < 100 + 8 + 90 + 120)
+                        && (y > 6 + 192 && y < 6 + 192 + 30)
+                    {
+                        new_game = true;
+                        break;
+                    }
+                }
+            }
+            if !pause {
+                self.graphics.layer_2.clear();
+                break;
+            }
+            if new_game {
+                self.graphics.layer_2.clear();
+                 self.graphics.layer_1.clear();
+                break;
+            }
+        }
+        if new_game {
+            self.reset();
+        }
+    }
     pub fn game_start_up(&mut self) {
         self.graphics.print_bmp_at_with_rotaion(
             self::graphics::welcome_screen_base,
@@ -531,5 +576,18 @@ impl Game {
         self.snake_tail_position = (21, 10);
         self.former_snake_tail = (20, 10);
         self.apple_position = (10, 10);
+    }
+
+    pub fn check_selfbite(&mut self) {
+        for i in 0..self.snake_body_position.len(){
+        if self.snake_head_position == self.snake_body_position[i]{
+            self.restart_game();
+        }
+        }
+        if self.snake_head_position == self.snake_tail_position{
+            self.restart_game();
+        }
+
+        
     }
 }
