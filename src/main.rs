@@ -125,8 +125,11 @@ fn main(hw: board::Hardware) -> ! {
 
     /* ETHERNET START */
     let mut network;
+    // Todo: How to choose NetworkMode?
+    let network_mode = network::NetworkMode::Client;
+    // let network_mode = network::NetworkMode::Server;
     // Todo: random EthernetAddress: FRAGE How to use random_gen here?
-    let eth_addr = smoltcp::wire::EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]);
+    let eth_addr = network::Network::get_ethernet_addr(network_mode);
     let ethernet_device = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),
@@ -137,14 +140,8 @@ fn main(hw: board::Hardware) -> ! {
         ethernet_dma,
         eth_addr,
     );
-    // if let Err(e) = ethernet_device {
-    //     panic!("ethernet init failed: {:?}", e);
-    // };
-    // if let Ok(ether) = ethernet_device {
-    //     network = network::Network::new(ether, network::NetworkMode::Client);
-    // }
     match ethernet_device {
-        Ok(ether_device) => network = network::Network::new(ether_device, network::NetworkMode::Client),
+        Ok(ether_device) => network = network::Network::new(ether_device, network_mode),
         Err(e) => panic!("error parsing ethernet_device: {:?}", e),
     }
     network.operate();

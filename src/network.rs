@@ -4,15 +4,34 @@ use alloc::Vec;
 use alloc::borrow::ToOwned;
 use smoltcp::iface::EthernetInterface;
 // use smoltcp::phy::wait as phy_wait;
-use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
+use smoltcp::socket::{SocketSet, TcpSocket, TcpSocketBuffer};
 use smoltcp::time::Instant;
-use smoltcp::wire::{EthernetAddress, IpAddress, IpCidr, Ipv4Address, Ipv4Cidr};
+use smoltcp::wire::{EthernetAddress, IpAddress, Ipv4Address};
 use stm32f7::ethernet;
 use stm32f7::ethernet::EthernetDevice;
 use stm32f7::system_clock;
 
 /**
+ * 
+    let mut network;
+    // Todo: random EthernetAddress: FRAGE How to use random_gen here?
+    let eth_addr = network::Network::get_ethernet_addr(network::NetworkMode::Client);
+    let ethernet_device = ethernet::EthernetDevice::new(
+        Default::default(),
+        Default::default(),
+        rcc,
+        syscfg,
+        &mut gpio,
+        ethernet_mac,
+        ethernet_dma,
+        eth_addr,
+    );
+    match ethernet_device {
+        Ok(ether_device) => network = network::Network::new(ether_device, network::NetworkMode::Client),
+        Err(e) => panic!("error parsing ethernet_device: {:?}", e),
+    }
  *
+ * then use network inside a loop()
  */
 pub struct Network {
     ethernet_interface: EthernetInterface<'static, 'static, EthernetDevice>,
@@ -25,6 +44,7 @@ pub struct Network {
 /**
  * Operate as either client or server.
  */
+#[derive(Copy, Clone)]
 pub enum NetworkMode {
     Client,
     Server,
@@ -39,16 +59,20 @@ impl Network {
      */
     pub fn new(ethernet_device: EthernetDevice, network_mode: NetworkMode) -> Network {
         // Todo: Automatically choose ip/eth (maybe check if already there, or random?)
-        let local_ip_addr = Ipv4Address([192, 168, 0, 42]);
+        let local_ip_addr: Ipv4Address;
+        match network_mode {
+            NetworkMode::Server => local_ip_addr = Ipv4Address([192, 168, 0, 24]),
+            NetworkMode::Client => local_ip_addr = Ipv4Address([192, 168, 0, 42]),
+        }
 
         // let remote_ip_addr = IpAddress::v4(192, 168, 0, 50);
         // let remote_port = 50000_u16;
 
         let tcp_rx_buffer = TcpSocketBuffer::new(vec![0; ethernet::MTU]);
         let tcp_tx_buffer = TcpSocketBuffer::new(vec![0; ethernet::MTU]);
-        let mut tcp_socket = TcpSocket::new(tcp_rx_buffer, tcp_tx_buffer);
+        let tcp_socket = TcpSocket::new(tcp_rx_buffer, tcp_tx_buffer);
 
-        let mut ethernet_interface = ethernet_device.into_interface(local_ip_addr);
+        let ethernet_interface = ethernet_device.into_interface(local_ip_addr);
 
         // tcp_socket.listen(endpoint).unwrap();
         let mut sockets = SocketSet::new(Vec::new());
@@ -85,6 +109,7 @@ impl Network {
     }
 
     fn operate_server(&mut self) {
+        let local_port = 6969_u16;
         // let timestamp = Instant::now();
         let timestamp = Instant::from_millis(system_clock::ticks() as i64);
         self.ethernet_interface
@@ -95,13 +120,13 @@ impl Network {
         {
             let mut socket = self.sockets.get::<TcpSocket>(self.tcp_handle);
             if !socket.is_open() {
-                socket.listen(6969).unwrap();
+                socket.listen(local_port).unwrap();
             }
 
             if socket.is_active() && !self.tcp_active {
-                hprintln!("tcp:6970 connected");
+                hprintln!("tcp:6969 connected");
             } else if !socket.is_active() && self.tcp_active {
-                hprintln!("tcp:6970 disconnected");
+                hprintln!("tcp:6969 disconnected");
             }
             self.tcp_active = socket.is_active();
 
@@ -135,8 +160,8 @@ impl Network {
             let mut socket = self.sockets.get::<TcpSocket>(self.tcp_handle);
             if !socket.is_open() {
                 let remote_ip_addr = IpAddress::v4(192, 168, 0, 50);
-                let remote_port = 50000_u16;
-                let local_port = 49500_u16;
+                let remote_port = 6969_u16;
+                let local_port = 7454_u16;
                 socket
                     .connect((remote_ip_addr, remote_port), local_port)
                     .unwrap();
@@ -158,7 +183,7 @@ impl Network {
             } else if !socket.is_active() && self.tcp_active {
                 hprintln!("disconnected");
                 // break;
-                panic!("Abort! - Disconnected");
+                return;
             }
             self.tcp_active = socket.is_active();
 
@@ -191,27 +216,10 @@ impl Network {
         // phy_wait(fd, self.ethernet_interface.poll_delay(&self.sockets, timestamp)).expect("wait error");
     }
 
-    // /**
-    //  * private: creating Interface
-    //  * (Copying)
-    //  * "pub fn into_interface<'a>(self) -> EthernetInterface<'a, 'a, Self>" from stm32f7-discovery::ethernet::EthernetDevice
-    //  */
-    // fn into_interface<'a>(
-    //     ethernet_device: stm32f7::ethernet::EthernetDevice,
-    //     ip_addr: Ipv4Address,
-
-    // ) -> EthernetInterface<'a, 'a, EthernetDevice> {
-    //     use alloc::BTreeMap;
-    //     use smoltcp::iface::EthernetInterfaceBuilder;
-    //     use smoltcp::iface::NeighborCache;
-
-    //     let neighbor_cache = NeighborCache::new(BTreeMap::new());
-    //     let ip_cidr = IpCidr::Ipv4(Ipv4Cidr::new(ip_addr, 0));
-    //     EthernetInterfaceBuilder::new(ethernet_device)
-    //         .ethernet_addr(eth_addr)
-    //         .neighbor_cache(neighbor_cache)
-    //         .ip_addrs(vec![ip_cidr])
-    //         // .ipv4_gateway(default_v4_gw)
-    //         .finalize()
-    // }
+    pub fn get_ethernet_addr(network_mode: NetworkMode) -> EthernetAddress {
+        match network_mode {
+            NetworkMode::Client => EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]),
+            NetworkMode::Server => EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xf0]),
+        }
+    }
 }
