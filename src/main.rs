@@ -120,7 +120,7 @@ fn main(hw: board::Hardware) -> ! {
     let mut i2c_3 = i2c::init(i2c_3);
     i2c_3.test_1();
     i2c_3.test_2();
-
+    system_clock::wait(200);
     touch::check_family_id(&mut i2c_3).unwrap();
 
     /* ETHERNET START */
@@ -141,11 +141,11 @@ fn gameloop(mut game: game::Game) -> ! {
     loop {
         // let ticks = system_clock::ticks();
         game.move_snake();
+        game.check_grid_edge();        
         game.snake_bite();
-        game.check_grid_edge();
         game.check_selfbite();
         game.draw_game();
 
-        system_clock::wait(100);
+        system_clock::wait(game.return_wait_tick());
     }
 }

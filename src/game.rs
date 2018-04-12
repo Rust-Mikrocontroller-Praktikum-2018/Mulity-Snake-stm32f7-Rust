@@ -69,14 +69,14 @@ impl Game {
             random_gen: random_gen,
             grid: vec![vec![Tile::Empty; game_height]; game_width],
             i2c_3: i2c_3,
-            snake_head_position: (25, 10),
-            snake_body_position: vec![(24, 10), (23, 10), (22, 10)],
+            snake_head_position: (24, 10),
+            snake_body_position: vec![(23, 10), (22, 10)],
             snake_tail_position: (21, 10),
             former_snake_tail: (20, 10),
-            apple_position: (10, 10),
+            apple_position: (1, 10),
             apple_counter: 0,
         };
-        return_game.grid[25][10] = Tile::SnakeHead(Direction::left);
+        return_game.grid[25][10] = Tile::SnakeHead(Direction::right);
         return_game
     }
 
@@ -142,7 +142,6 @@ impl Game {
      * Draws current game state to screen.
      */
     pub fn draw_game(&mut self) {
-
         // draw head (bmp of head)
         // Bmp
         let direction = &self.grid[self.snake_head_position.0][self.snake_head_position.1];
@@ -151,31 +150,19 @@ impl Game {
         match direction {
             &Tile::SnakeHead(Direction::left) => {
                 rot = self::graphics::RotDirection::r_0;
-                apple_offset = (
-                    self.apple_position.0  + 1,
-                    self.apple_position.1,
-                )
+                apple_offset = (self.apple_position.0 + 1, self.apple_position.1)
             }
             &Tile::SnakeHead(Direction::up) => {
                 rot = self::graphics::RotDirection::r_90;
-                apple_offset = (
-                    self.apple_position.0,
-                    self.apple_position.1 + 1,
-                )
+                apple_offset = (self.apple_position.0, self.apple_position.1 + 1)
             }
             &Tile::SnakeHead(Direction::right) => {
                 rot = self::graphics::RotDirection::r_180;
-                apple_offset = (
-                    self.apple_position.0- 1,
-                    self.apple_position.1,
-                )
+                apple_offset = (self.apple_position.0 - 1, self.apple_position.1)
             }
             &Tile::SnakeHead(Direction::down) => {
                 rot = self::graphics::RotDirection::r_270;
-                apple_offset = (
-                    self.apple_position.0,
-                    self.apple_position.1 - 1,
-                )
+                apple_offset = (self.apple_position.0, self.apple_position.1 - 1)
             }
             _ => {}
         }
@@ -540,6 +527,7 @@ impl Game {
 
     fn pause_game(&mut self) {
         self.graphics.print_pause_screen();
+        println!("     score: {}", self.apple_counter);
         let mut pause = true;
         let mut new_game = false;
         loop {
@@ -581,7 +569,7 @@ impl Game {
 
     fn restart_game(&mut self) {
         self.graphics.print_restart_screen();
-        println!("/n/n/n    score: {}", self.apple_counter);
+        println!("     score: {}", self.apple_counter);
         self.apple_counter = 0;
         let mut pause = true;
         let mut new_game = false;
@@ -670,7 +658,7 @@ impl Game {
         self.snake_body_position = vec![(24, 10), (23, 10), (22, 10)];
         self.snake_tail_position = (21, 10);
         self.former_snake_tail = (20, 10);
-        self.apple_position = (10, 10);
+        self.apple_position = (1, 10);
         self.draw_frame();
     }
 
@@ -685,4 +673,16 @@ impl Game {
             self.restart_game();
         }
     }
+
+    pub fn return_wait_tick(&mut self) -> usize {
+
+        let mut tick:usize = 100;
+        
+        if let Some(new) = tick.checked_sub(self.apple_counter * 5) {
+        
+           return new
+        }
+        tick
+    }
 }
+
