@@ -144,50 +144,22 @@ fn main(hw: board::Hardware) -> ! {
         Ok(ether_device) => network = network::Network::new(ether_device, network_mode),
         Err(e) => panic!("error parsing ethernet_device: {:?}", e),
     }
-    network.operate();
 
     /* ETHERNET END */
 
     let random_gen = random::Random::new(rng, rcc);
     // Initialize Game
     let mut game = game::Game::new(graphics, i2c_3, random_gen);
-    gameloop(game);
+    gameloop(game, network);
 }
 
-fn gameloop(mut game: game::Game) -> ! {
-    // Define Pictures
-    // let pic1: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
-    // let pic2: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
-    // let pic3: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
-    // game.graphics
-    //     .print_bmp_at_with_rotaion(pic1, 0, 0, graphics::RotDirection::r_0);
-    // game.graphics.print_bmp_at_layer2(pic2, 300, 0);
-
-    // let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game\n";
-
-    // for c in welcome.chars() {
-    //     if c == ' ' || c == '-' || c == '!' {
-    //         print!("{}", c);
-    //         system_clock::wait(10);
-    //     } else {
-    //         game.graphics.print_bmp_at_downwards(pic2, 188, 85);
-    //         print!("{}", c);
-    //         //system_clock::wait(10);
-    //         game.graphics.print_bmp_at_downwards(pic3, 188, 85);
-    //     }
-    // }
-    // game.graphics.print_bmp_at_with_rotaion(pic, 0, 0, graphics::RotDirection::r_0);
-    // game.graphics.print_bmp_at_with_rotaion(pic, 85, 0, graphics::RotDirection::r_90);
-    // game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);
-    // game.graphics.print_bmp_at_with_rotaion(pic, 260, 0, graphics::RotDirection::r_270);
-    /* Random Example */
-    let ran = game.random_gen.random_range(0, 42);
-    println!("A random number: 0 <= {} < 42!!!", ran);
+fn gameloop(mut game: game::Game, mut network: network::Network) -> ! {
     loop {
         // let ticks = system_clock::ticks();
-        game.move_snake();
-        game.snake_bite();
-        game.draw_game();
+        // game.move_snake();
+        // game.snake_bite();
+        // game.draw_game();
         system_clock::wait(100);
+        network.operate();
     }
 }
