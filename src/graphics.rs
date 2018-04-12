@@ -17,8 +17,13 @@ pub const pause_screen_top: &[u8] = include_bytes!("../assets/Pause_screen_top.b
 pub const pause_screen_resume: &[u8] = include_bytes!("../assets/Pause_screen_resume.bmp");
 pub const pause_screen_new_game: &[u8] = include_bytes!("../assets/Pause_screen_New_game.bmp");
 pub const welcome_screen_base: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
-pub const welcome_screen_open_mouth: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
-pub const welcome_screen_closed_mouth: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
+pub const welcome_screen_open_mouth: &[u8] =
+    include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
+pub const welcome_screen_closed_mouth: &[u8] =
+    include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
+pub const apple_bmp: &[u8] = include_bytes!("../assets/apple.bmp");
+pub const snake_mouth_closed: &[u8] = include_bytes!("../assets/snake_head_closed.bmp");
+pub const snake_mouth_open: &[u8] = include_bytes!("../assets/snake_head_opened.bmp");
 
 impl Graphics {
     /**
@@ -91,32 +96,38 @@ impl Graphics {
 
         match rot {
             RotDirection::r_0 => {
-                at_y = y + height;
+                at_y = y + height - 1;
             }
             RotDirection::r_90 => {
-                at_y = y + rot_height;
+                at_y = y + rot_height - 1;
             }
             RotDirection::r_180 => {
-                at_y = y + height;
+                at_y = y + height - 1;
                 bytenr = pic_length - 1;
             }
             RotDirection::r_270 => {
-                at_y = y + rot_height;
+                at_y = y + rot_height - 1;
             }
         }
 
         match rot {
             RotDirection::r_0 => for i in 0..height {
                 for j in 0..width {
-                    self.layer_1.print_point_color_at(
-                        (j + at_x) as usize,
-                        (at_y - i) as usize,
-                        lcd::Color::rgb(
-                            pic[bytenr as usize + 2],
-                            pic[(bytenr + 1) as usize],
-                            pic[(bytenr) as usize],
-                        ),
-                    );
+                    if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
+                        && pic[(bytenr) as usize] > 245
+                    {
+
+                    } else {
+                        self.layer_1.print_point_color_at(
+                            (j + at_x) as usize,
+                            (at_y - i) as usize,
+                            lcd::Color::rgb(
+                                pic[bytenr as usize + 2],
+                                pic[(bytenr + 1) as usize],
+                                pic[(bytenr) as usize],
+                            ),
+                        );
+                    }
                     bytenr = bytenr + 3;
                     if j == (width - 1) {
                         bytenr = bytenr + pixel_rest;
@@ -126,30 +137,42 @@ impl Graphics {
             RotDirection::r_90 => for i in 0..rot_height {
                 bytenr = pixels_start + width * 3 - 3 * (i + 1);
                 for j in 0..rot_width {
-                    self.layer_1.print_point_color_at(
-                        (j + at_x) as usize,
-                        (at_y - i) as usize,
-                        lcd::Color::rgb(
-                            pic[(bytenr + 2) as usize],
-                            pic[(bytenr + 1) as usize],
-                            pic[(bytenr) as usize],
-                        ),
-                    );
+                    if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
+                        && pic[(bytenr) as usize] > 245
+                    {
+
+                    } else {
+                        self.layer_1.print_point_color_at(
+                            (j + at_x) as usize,
+                            (at_y - i) as usize,
+                            lcd::Color::rgb(
+                                pic[(bytenr + 2) as usize],
+                                pic[(bytenr + 1) as usize],
+                                pic[(bytenr) as usize],
+                            ),
+                        );
+                    }
                     bytenr = bytenr + width * 3 + pixel_rest;
                 }
             },
             RotDirection::r_180 => for i in 0..height {
                 bytenr = bytenr - pixel_rest;
                 for j in 0..width {
-                    self.layer_1.print_point_color_at(
-                        (j + at_x) as usize,
-                        (at_y - i) as usize,
-                        lcd::Color::rgb(
-                            pic[(bytenr) as usize],
-                            pic[(bytenr - 1) as usize],
-                            pic[(bytenr - 2) as usize],
-                        ),
-                    );
+                    if pic[(bytenr - 2) as usize] > 245 && pic[(bytenr - 1) as usize] > 245
+                        && pic[(bytenr) as usize] > 245
+                    {
+
+                    } else {
+                        self.layer_1.print_point_color_at(
+                            (j + at_x) as usize,
+                            (at_y - i) as usize,
+                            lcd::Color::rgb(
+                                pic[(bytenr) as usize],
+                                pic[(bytenr - 1) as usize],
+                                pic[(bytenr - 2) as usize],
+                            ),
+                        );
+                    }
                     bytenr = bytenr - 3;
                 }
             },
@@ -157,17 +180,23 @@ impl Graphics {
                 bytenr = pixels_start + (height - 1) * (3 * width + pixel_rest) + i * 3;
 
                 for j in 0..rot_width {
-                    self.layer_1.print_point_color_at(
-                        (j + at_x) as usize,
-                        (at_y - i) as usize,
-                        lcd::Color::rgb(
-                            pic[(bytenr + 2) as usize],
-                            pic[(bytenr + 1) as usize],
-                            pic[(bytenr) as usize],
-                        ),
-                    );
-                    if bytenr >((3 * width) + pixel_rest) {
-                    bytenr = bytenr - (3 * width) - pixel_rest;
+                    if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
+                        && pic[(bytenr) as usize] > 245
+                    {
+
+                    } else {
+                        self.layer_1.print_point_color_at(
+                            (j + at_x) as usize,
+                            (at_y - i) as usize,
+                            lcd::Color::rgb(
+                                pic[(bytenr + 2) as usize],
+                                pic[(bytenr + 1) as usize],
+                                pic[(bytenr) as usize],
+                            ),
+                        );
+                    }
+                    if bytenr > ((3 * width) + pixel_rest) {
+                        bytenr = bytenr - (3 * width) - pixel_rest;
                     };
                 }
             },
@@ -217,29 +246,29 @@ impl Graphics {
         for i in 0..height {
             bytenr = pixel_end + 1 - (pixel_rest + width * 3) * (i + 1);
             for j in 0..width {
-                if pic[(bytenr + 2) as usize]>245 && pic[(bytenr + 1) as usize]>245 && pic[(bytenr) as usize]>245{
+                if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
+                    && pic[(bytenr) as usize] > 245
+                {
 
+                } else {
+                    self.layer_2.print_point_color_at(
+                        (j + at_x) as usize,
+                        (at_y + i) as usize,
+                        lcd::Color::rgba(
+                            pic[(bytenr + 2) as usize],
+                            pic[(bytenr + 1) as usize],
+                            pic[(bytenr) as usize],
+                            pic[(bytenr) as usize],
+                        ),
+                    );
                 }
-                else{
-                self.layer_2.print_point_color_at(
-                    (j + at_x) as usize,
-                    (at_y + i) as usize,
-                    lcd::Color::rgba(
-                        pic[(bytenr + 2) as usize],
-                        pic[(bytenr + 1) as usize],
-                        pic[(bytenr) as usize],
-                        pic[(bytenr) as usize],
-                    ),
-                );}
                 bytenr = bytenr + 3;
             }
         }
     }
-    pub fn print_pause_screen(&mut self){  
-        self.print_bmp_at_layer2(pause_screen_top, 100+8, 6);
-        self.print_bmp_at_layer2(pause_screen_resume, 100+8+90, 139+6);
-        self.print_bmp_at_layer2(pause_screen_new_game, 100+8+78, 192+6);
-
-
+    pub fn print_pause_screen(&mut self) {
+        self.print_bmp_at_layer2(pause_screen_top, 100 + 8, 6);
+        self.print_bmp_at_layer2(pause_screen_resume, 100 + 8 + 90, 139 + 6);
+        self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
     }
 }
