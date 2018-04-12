@@ -11,7 +11,7 @@ extern crate stm32f7_discovery as stm32f7; // initialization routines for .data 
 use alloc::Vec;
 use graphics;
 use random;
-use stm32f7::{lcd, touch,system_clock};
+use stm32f7::{lcd, system_clock, touch};
 
 use super::HEIGHT;
 use super::WIDTH;
@@ -83,17 +83,36 @@ impl Game {
      */
     pub fn draw_game(&mut self) {
         // draw head (bmp of head)
-        self.graphics.print_square_size_color_at(
-            self.snake_head_position.0 * GRID_BLOCK_SIZE,
-            self.snake_head_position.1 * GRID_BLOCK_SIZE,
-            GRID_BLOCK_SIZE - 1,
-            lcd::Color {
-                red: 0,
-                green: 0,
-                blue: 0,
-                alpha: 255,
-            },
+        // Bmp
+        let direction = &self.grid[self.snake_head_position.0][self.snake_head_position.1];
+        let mut rot = self::graphics::RotDirection::r_0;
+        match direction {
+            &Tile::SnakeHead(Direction::left) => rot = self::graphics::RotDirection::r_0,
+            &Tile::SnakeHead(Direction::up) => rot = self::graphics::RotDirection::r_90,
+            &Tile::SnakeHead(Direction::right) => rot = self::graphics::RotDirection::r_180,
+            &Tile::SnakeHead(Direction::down) => rot = self::graphics::RotDirection::r_270,
+            _ => {}
+        }
+
+        self.graphics.print_bmp_at_with_rotaion(
+            graphics::snake_mouth_closed,
+            (self.snake_head_position.0 * GRID_BLOCK_SIZE) as u32,
+            (self.snake_head_position.1 * GRID_BLOCK_SIZE) as u32,
+            rot,
         );
+
+        // self.graphics.print_square_size_color_at(
+        //     self.snake_head_position.0 * GRID_BLOCK_SIZE,
+        //     self.snake_head_position.1 * GRID_BLOCK_SIZE,
+        //     GRID_BLOCK_SIZE - 1,
+        //     lcd::Color {
+        //         red: 0,
+        //         green: 0,
+        //         blue: 0,
+        //         alpha: 255,
+        //     },
+        // );
+
         // draw body (bmp of body)
         for i in 0..self.snake_body_position.len() {
             self.graphics.print_square_size_color_at(
@@ -138,18 +157,26 @@ impl Game {
         }
 
         // draw apple (bmp of apple)
+        // Bmp
+        self.graphics.print_bmp_at_with_rotaion(
+            graphics::apple_bmp,
+            (self.apple_position.0 * GRID_BLOCK_SIZE) as u32,
+            (self.apple_position.1 * GRID_BLOCK_SIZE) as u32,
+            self::graphics::RotDirection::r_0,
+        )
 
-        self.graphics.print_square_size_color_at(
-            self.apple_position.0 * GRID_BLOCK_SIZE,
-            self.apple_position.1 * GRID_BLOCK_SIZE,
-            GRID_BLOCK_SIZE - 1,
-            lcd::Color {
-                red: 255,
-                green: 255,
-                blue: 0,
-                alpha: 255,
-            },
-        );
+        // Quadrat
+        // self.graphics.print_square_size_color_at(
+        //     self.apple_position.0 * GRID_BLOCK_SIZE,
+        //     self.apple_position.1 * GRID_BLOCK_SIZE,
+        //     GRID_BLOCK_SIZE - 1,
+        //     lcd::Color {
+        //         red: 255,
+        //         green: 255,
+        //         blue: 0,
+        //         alpha: 255,
+        //     },
+        // );
     }
 
     /**
@@ -446,7 +473,7 @@ impl Game {
             }
             if new_game {
                 self.graphics.layer_2.clear();
-                 self.graphics.layer_1.clear();
+                self.graphics.layer_1.clear();
                 break;
             }
         }
