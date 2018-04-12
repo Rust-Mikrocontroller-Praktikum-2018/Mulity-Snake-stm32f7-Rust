@@ -85,11 +85,10 @@ impl Game {
      */
 
     pub fn draw_frame(&mut self) {
-
-       for i in GRID_BLOCK_SIZE -2..WIDTH-GRID_BLOCK_SIZE {
+        for i in GRID_BLOCK_SIZE - 2..WIDTH - GRID_BLOCK_SIZE {
             self.graphics.print_square_size_color_at(
                 i,
-                GRID_BLOCK_SIZE-2,
+                GRID_BLOCK_SIZE - 2,
                 1,
                 lcd::Color {
                     red: 0,
@@ -99,7 +98,7 @@ impl Game {
                 },
             );
         }
-        for i in GRID_BLOCK_SIZE -2..WIDTH-GRID_BLOCK_SIZE {
+        for i in GRID_BLOCK_SIZE - 2..WIDTH - GRID_BLOCK_SIZE {
             self.graphics.print_square_size_color_at(
                 i,
                 HEIGHT - GRID_BLOCK_SIZE - 1,
@@ -112,7 +111,7 @@ impl Game {
                 },
             );
         }
-        for i in GRID_BLOCK_SIZE - 2..HEIGHT-GRID_BLOCK_SIZE {
+        for i in GRID_BLOCK_SIZE - 2..HEIGHT - GRID_BLOCK_SIZE {
             self.graphics.print_square_size_color_at(
                 WIDTH - GRID_BLOCK_SIZE,
                 i,
@@ -125,9 +124,9 @@ impl Game {
                 },
             );
         }
-        for i in GRID_BLOCK_SIZE - 2..HEIGHT-GRID_BLOCK_SIZE {
+        for i in GRID_BLOCK_SIZE - 2..HEIGHT - GRID_BLOCK_SIZE {
             self.graphics.print_square_size_color_at(
-                GRID_BLOCK_SIZE -2,
+                GRID_BLOCK_SIZE - 2,
                 i,
                 1,
                 lcd::Color {
@@ -546,7 +545,7 @@ impl Game {
 
     fn restart_game(&mut self) {
         self.graphics.print_restart_screen();
-        println!("/n/n/n    score: {}",self.apple_counter);
+        println!("/n/n/n    score: {}", self.apple_counter);
         self.apple_counter = 0;
         let mut pause = true;
         let mut new_game = false;
@@ -640,16 +639,14 @@ impl Game {
     }
 
     pub fn check_selfbite(&mut self) {
-        for i in 0..self.snake_body_position.len(){
-            if self.snake_head_position == self.snake_body_position[i]{
+        for i in 0..self.snake_body_position.len() {
+            if self.snake_head_position == self.snake_body_position[i] {
                 self.restart_game();
-                return
+                return;
             }
         }
-        if self.snake_head_position == self.snake_tail_position{
+        if self.snake_head_position == self.snake_tail_position {
             self.restart_game();
         }
-
-        
     }
 }
