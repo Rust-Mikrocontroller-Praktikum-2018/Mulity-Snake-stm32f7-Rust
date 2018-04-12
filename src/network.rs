@@ -7,7 +7,6 @@ use smoltcp::iface::EthernetInterface;
 use smoltcp::socket::{Socket, SocketSet, UdpPacketMetadata, UdpSocket, UdpSocketBuffer};
 use smoltcp::time::Instant;
 use smoltcp::wire::{EthernetAddress, IpAddress, IpEndpoint, Ipv4Address};
-use stm32f7::ethernet;
 use stm32f7::ethernet::EthernetDevice;
 use stm32f7::system_clock;
 
@@ -121,7 +120,7 @@ impl Network {
     /**
      *
      */
-    fn print_data_as_char(data: &mut Vec<u8>) {
+    fn hprintln_data_as_char(data: &mut Vec<u8>) {
         if data.len() > 0 {
             // data = data.split(|&b| b == b'\n').collect::<Vec<_>>().concat();
             hprint!("Data received: ");
@@ -138,7 +137,7 @@ impl Network {
             None => {}
             Some(x) => {
                 let mut x_copy = x.to_owned();
-                Network::print_data_as_char(&mut x_copy);
+                Network::hprintln_data_as_char(&mut x_copy);
             }
         }
     }
@@ -159,7 +158,6 @@ impl Network {
                 if socket_changed {
                     for mut socket in self.sockets.iter_mut() {
                         return Network::poll_socket(&mut socket).expect("socket poll failed");
-                        // return Network::poll_socket(&mut socket).unwrap()
                     }
                 } else {
                     return None;
