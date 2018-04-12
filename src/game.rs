@@ -127,7 +127,7 @@ impl Game {
             self.graphics.print_square_size_color_at(
                 self.former_snake_tail.0 * GRID_BLOCK_SIZE,
                 self.former_snake_tail.1 * GRID_BLOCK_SIZE,
-                GRID_BLOCK_SIZE - 1,
+                GRID_BLOCK_SIZE,
                 lcd::Color {
                     red: 255,
                     green: 255,
@@ -372,7 +372,7 @@ impl Game {
             && self.snake_head_position.0 == 0
         {
             self.grid[self.snake_head_position.0][self.snake_head_position.1] = Tile::Empty;
-            self.snake_head_position.0 = WIDTH / GRID_BLOCK_SIZE - 1;
+            self.snake_head_position.0 = WIDTH / GRID_BLOCK_SIZE - 2;
             self.grid[self.snake_head_position.0][self.snake_head_position.1] =
                 Tile::SnakeHead(Direction::left);
         } else if self.grid[self.snake_head_position.0][self.snake_head_position.1]
