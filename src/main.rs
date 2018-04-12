@@ -16,8 +16,7 @@ extern crate arrayvec;
 extern crate r0;
 extern crate smoltcp;
 
-#[macro_use]
-use stm32f7::{board, embedded, ethernet, exceptions, lcd, sdram, system_clock, touch, i2c};
+use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock, touch, i2c};
 
 mod game;
 mod graphics;
@@ -126,6 +125,8 @@ fn main(hw: board::Hardware) -> ! {
 
     /* ETHERNET START */
     let network;
+    // Todo: random EthernetAddress: FRAGE How to use random_gen here?
+    let eth_addr = smoltcp::wire::EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]);
     let mut ethernet_device = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),
@@ -134,17 +135,16 @@ fn main(hw: board::Hardware) -> ! {
         &mut gpio,
         ethernet_mac,
         ethernet_dma,
+        eth_addr
     );
     if let Err(e) = ethernet_device {
-        println!("ethernet init failed: {:?}", e);
         panic!("ethernet init failed: {:?}", e);
     };
     if let Ok(ether) = ethernet_device {
-        network = network::Network::new(ether, network::NetworkMode::client);
+        network = network::Network::new(ether, network::NetworkMode::Client);
     }
 
     /* ETHERNET END */
-    // l0et layer2 = lcd::Layer<lcd::FramebufferAl88>;
 
     let random_gen = random::Random::new(rng, rcc);
     // Initialize Game

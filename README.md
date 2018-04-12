@@ -1,8 +1,12 @@
-# Multi-Snake-stm32f7-Rust
+# Mulity-Snake-stm32f7-Rust
 Multiplayer Snake for stm32f7 written in Rust
 
 **PLS**:  
-rename either `.gdbinitv7` or `.gdbinitv8` to `.gdbinit` depending on your gdb version.
+copy either `.gdbinitv7` or `.gdbinitv8` to `.gdbinit` depending on your gdb version. (or make symlink).
+
+```bash
+cp .gdbinitv7 .gdbinit
+```
 
 ## Build + Run
 On Linux/Mac:
