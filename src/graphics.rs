@@ -1,4 +1,4 @@
-use stm32f7::lcd;
+use stm32f7::{lcd, system_clock};
 
 pub struct Graphics {
     lcd: lcd::Lcd,
@@ -53,7 +53,14 @@ impl Graphics {
             .set_background_color(lcd::Color::from_hex(0xe8c65f)); // snake color
         graphics
     }
-
+    pub fn background_blink(&mut self) {
+        for i in 0..5 {
+            self.lcd.set_background_color(lcd::Color::rgb(255, 0, 0));
+            system_clock::wait(100);
+            self.lcd
+                .set_background_color(lcd::Color::from_hex(0xe8c65f));
+        }
+    }
     /**
      * prints a square in defined size+color at position x,y
      */
@@ -271,9 +278,8 @@ impl Graphics {
         self.print_bmp_at_layer2(pause_screen_resume, 100 + 8 + 90, 139 + 6);
         self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
     }
-    pub fn print_restart_screen(&mut self){  
-        self.print_bmp_at_layer2(pause_screen_top, 100+8, 6);
-        self.print_bmp_at_layer2(pause_screen_new_game, 100+8+78, 192+6);
-
+    pub fn print_restart_screen(&mut self) {
+        self.print_bmp_at_layer2(pause_screen_top, 100 + 8, 6);
+        self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
     }
 }

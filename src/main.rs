@@ -121,6 +121,8 @@ fn main(hw: board::Hardware) -> ! {
     i2c_3.test_1();
     i2c_3.test_2();
 
+    system_clock::wait(200);
+
     touch::check_family_id(&mut i2c_3).unwrap();
 
     /* ETHERNET START */
@@ -145,7 +147,7 @@ fn gameloop(mut game: game::Game) -> ! {
         game.check_grid_edge();
         game.check_selfbite();
         game.draw_game();
-
         system_clock::wait(100);
+
     }
 }

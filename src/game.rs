@@ -76,7 +76,7 @@ impl Game {
             apple_position: (10, 10),
             apple_counter: 0,
         };
-        return_game.grid[25][10] = Tile::SnakeHead(Direction::left);
+        return_game.grid[25][10] = Tile::SnakeHead(Direction::right);
         return_game
     }
 
@@ -142,7 +142,6 @@ impl Game {
      * Draws current game state to screen.
      */
     pub fn draw_game(&mut self) {
-
         // draw head (bmp of head)
         // Bmp
         let direction = &self.grid[self.snake_head_position.0][self.snake_head_position.1];
@@ -151,31 +150,19 @@ impl Game {
         match direction {
             &Tile::SnakeHead(Direction::left) => {
                 rot = self::graphics::RotDirection::r_0;
-                apple_offset = (
-                    self.apple_position.0  + 1,
-                    self.apple_position.1,
-                )
+                apple_offset = (self.apple_position.0 + 1, self.apple_position.1)
             }
             &Tile::SnakeHead(Direction::up) => {
                 rot = self::graphics::RotDirection::r_90;
-                apple_offset = (
-                    self.apple_position.0,
-                    self.apple_position.1 + 1,
-                )
+                apple_offset = (self.apple_position.0, self.apple_position.1 + 1)
             }
             &Tile::SnakeHead(Direction::right) => {
                 rot = self::graphics::RotDirection::r_180;
-                apple_offset = (
-                    self.apple_position.0- 1,
-                    self.apple_position.1,
-                )
+                apple_offset = (self.apple_position.0 - 1, self.apple_position.1)
             }
             &Tile::SnakeHead(Direction::down) => {
                 rot = self::graphics::RotDirection::r_270;
-                apple_offset = (
-                    self.apple_position.0,
-                    self.apple_position.1 - 1,
-                )
+                apple_offset = (self.apple_position.0, self.apple_position.1 - 1)
             }
             _ => {}
         }
@@ -580,8 +567,10 @@ impl Game {
     }
 
     fn restart_game(&mut self) {
+        self.graphics.background_blink();
+
         self.graphics.print_restart_screen();
-        println!("/n/n/n    score: {}", self.apple_counter);
+        println!("   score: {}", self.apple_counter);
         self.apple_counter = 0;
         let mut pause = true;
         let mut new_game = false;
@@ -629,11 +618,11 @@ impl Game {
             graphics::RotDirection::r_0,
         );
 
-        let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game";
+        let welcome = "Welcome to Mulity-Snake! Touch screen to start the game";
 
         for c in welcome.chars() {
             if c == ' ' || c == '-' || c == '!' {
-                print!("{}", c);
+                println!("{}", c);
             // system_clock::wait(10);
             } else {
                 self.graphics.print_bmp_at_downwards(
