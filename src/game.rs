@@ -74,7 +74,7 @@ impl Game {
             former_snake_tail: (20, 10),
             apple_position: (10, 10),
         };
-        return_game.grid[25][10] = Tile::SnakeHead(Direction::right);
+        return_game.grid[25][10] = Tile::SnakeHead(Direction::left);
         return_game
     }
 
@@ -82,24 +82,60 @@ impl Game {
      * Draws current game state to screen.
      */
     pub fn draw_game(&mut self) {
+
         // draw head (bmp of head)
         // Bmp
         let direction = &self.grid[self.snake_head_position.0][self.snake_head_position.1];
+        let mut apple_offset = self.apple_position;
         let mut rot = self::graphics::RotDirection::r_0;
         match direction {
-            &Tile::SnakeHead(Direction::left) => rot = self::graphics::RotDirection::r_0,
-            &Tile::SnakeHead(Direction::up) => rot = self::graphics::RotDirection::r_90,
-            &Tile::SnakeHead(Direction::right) => rot = self::graphics::RotDirection::r_180,
-            &Tile::SnakeHead(Direction::down) => rot = self::graphics::RotDirection::r_270,
+            &Tile::SnakeHead(Direction::left) => {
+                rot = self::graphics::RotDirection::r_0;
+                apple_offset = (
+                    self.apple_position.0  + 1,
+                    self.apple_position.1,
+                )
+            }
+            &Tile::SnakeHead(Direction::up) => {
+                rot = self::graphics::RotDirection::r_90;
+                apple_offset = (
+                    self.apple_position.0,
+                    self.apple_position.1 + 1,
+                )
+            }
+            &Tile::SnakeHead(Direction::right) => {
+                rot = self::graphics::RotDirection::r_180;
+                apple_offset = (
+                    self.apple_position.0- 1,
+                    self.apple_position.1,
+                )
+            }
+            &Tile::SnakeHead(Direction::down) => {
+                rot = self::graphics::RotDirection::r_270;
+                apple_offset = (
+                    self.apple_position.0,
+                    self.apple_position.1 - 1,
+                )
+            }
             _ => {}
         }
+        // println!("{}, {}, {}", self.snake_head_position.1, self.apple_position.1, apple_offset.1);
 
-        self.graphics.print_bmp_at_with_rotaion(
-            graphics::snake_mouth_closed,
-            (self.snake_head_position.0 * GRID_BLOCK_SIZE) as u32,
-            (self.snake_head_position.1 * GRID_BLOCK_SIZE) as u32,
-            rot,
-        );
+        if self.snake_head_position == apple_offset {
+            self.graphics.print_bmp_at_with_rotaion(
+                graphics::snake_mouth_open,
+                (self.snake_head_position.0 * GRID_BLOCK_SIZE) as u32,
+                (self.snake_head_position.1 * GRID_BLOCK_SIZE) as u32,
+                rot,
+            );
+        } else {
+            self.graphics.print_bmp_at_with_rotaion(
+                graphics::snake_mouth_closed,
+                (self.snake_head_position.0 * GRID_BLOCK_SIZE) as u32,
+                (self.snake_head_position.1 * GRID_BLOCK_SIZE) as u32,
+                rot,
+            );
+        }
 
         // self.graphics.print_square_size_color_at(
         //     self.snake_head_position.0 * GRID_BLOCK_SIZE,
@@ -120,9 +156,9 @@ impl Game {
                 self.snake_body_position[i].1 * GRID_BLOCK_SIZE,
                 GRID_BLOCK_SIZE - 1,
                 lcd::Color {
-                    red: 255,
-                    green: 0,
-                    blue: 0,
+                    red: 100,
+                    green: 100,
+                    blue: 100,
                     alpha: 255,
                 },
             );
@@ -136,7 +172,7 @@ impl Game {
             lcd::Color {
                 red: 0,
                 green: 0,
-                blue: 255,
+                blue: 0,
                 alpha: 255,
             },
         );
@@ -431,9 +467,9 @@ impl Game {
                     y,
                     1,
                     lcd::Color {
-                        red: 156,
-                        green: 193,
-                        blue: 54,
+                        red: 209,
+                        green: 115,
+                        blue: 28,
                         alpha: 255,
                     },
                 );

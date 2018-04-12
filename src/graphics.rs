@@ -50,7 +50,7 @@ impl Graphics {
         graphics.layer_2.clear();
         graphics
             .lcd
-            .set_background_color(lcd::Color::from_hex(0x9CC136)); // snake color
+            .set_background_color(lcd::Color::from_hex(0xe8c65f)); // snake color
         graphics
     }
 
