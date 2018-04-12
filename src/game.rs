@@ -31,6 +31,7 @@ pub struct Game {
     snake_tail_position: (usize, usize),
     former_snake_tail: (usize, usize),
     apple_position: (usize, usize),
+    pub apple_counter: usize,
 }
 
 /**
@@ -73,6 +74,7 @@ impl Game {
             snake_tail_position: (21, 10),
             former_snake_tail: (20, 10),
             apple_position: (10, 10),
+            apple_counter: 0,
         };
         return_game.grid[25][10] = Tile::SnakeHead(Direction::right);
         return_game
@@ -134,9 +136,9 @@ impl Game {
             self.snake_tail_position.1 * GRID_BLOCK_SIZE,
             GRID_BLOCK_SIZE - 1,
             lcd::Color {
-                red: 0,
+                red: 255,
                 green: 0,
-                blue: 255,
+                blue: 0,
                 alpha: 255,
             },
         );
@@ -366,6 +368,7 @@ impl Game {
             let y = self.random_gen
                 .random_range(1, HEIGHT as u32 / GRID_BLOCK_SIZE as u32 - 1);
             self.apple_position = (x as usize, y as usize);
+            self.apple_counter = self.apple_counter + 1;
         }
     }
 
@@ -484,6 +487,7 @@ impl Game {
 
     fn restart_game(&mut self) {
         self.graphics.print_restart_screen();
+        println!("    score: {}",self.apple_counter);
         let mut pause = true;
         let mut new_game = false;
         loop {

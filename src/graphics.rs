@@ -275,6 +275,5 @@ impl Graphics {
         self.print_bmp_at_layer2(pause_screen_top, 100+8, 6);
         self.print_bmp_at_layer2(pause_screen_new_game, 100+8+78, 192+6);
 
-
     }
 }
