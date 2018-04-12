@@ -13,7 +13,10 @@ pub enum RotDirection {
     r_270,
 }
 
-pub const pause_screen_top: &[u8] = include_bytes!("../assets/Pause_screen_top.bmp");
+pub const pause_screen_right: &[u8] = include_bytes!("../assets/Pause_screen_snake_left.bmp");
+pub const pause_screen_left: &[u8] = include_bytes!("../assets/Pause_screen_snake_right.bmp");
+pub const pause_screen_game_over: &[u8] = include_bytes!("../assets/Pause_screen_game_over.bmp");
+pub const pause_screen_pause: &[u8] = include_bytes!("../assets/Pause_screen_pause.bmp");
 pub const pause_screen_resume: &[u8] = include_bytes!("../assets/Pause_screen_resume.bmp");
 pub const pause_screen_new_game: &[u8] = include_bytes!("../assets/Pause_screen_New_game.bmp");
 pub const welcome_screen_base: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
@@ -50,15 +53,16 @@ impl Graphics {
         graphics.layer_2.clear();
         graphics
             .lcd
-            .set_background_color(lcd::Color::from_hex(0xe8c65f)); // snake color
+            .set_background_color(lcd::Color::from_hex(0xb07708)); // snake color
         graphics
     }
     pub fn background_blink(&mut self) {
-        for i in 0..5 {
+        for i in 0..6 {
             self.lcd.set_background_color(lcd::Color::rgb(255, 0, 0));
-            system_clock::wait(100);
+            system_clock::wait(50);
             self.lcd
-                .set_background_color(lcd::Color::from_hex(0xe8c65f));
+                .set_background_color(lcd::Color::from_hex(0xb07708));
+                system_clock::wait(50);
         }
     }
     /**
@@ -265,7 +269,7 @@ impl Graphics {
                             pic[(bytenr + 2) as usize],
                             pic[(bytenr + 1) as usize],
                             pic[(bytenr) as usize],
-                            pic[(bytenr) as usize],
+                            pic[(bytenr) as usize]-50,
                         ),
                     );
                 }
@@ -274,12 +278,16 @@ impl Graphics {
         }
     }
     pub fn print_pause_screen(&mut self) {
-        self.print_bmp_at_layer2(pause_screen_top, 100 + 8, 6);
+        self.print_bmp_at_layer2(pause_screen_left, 90 + 8, 20);
+        self.print_bmp_at_layer2(pause_screen_right, 90 + 100 + 102 + 8, 20);
+        self.print_bmp_at_layer2(pause_screen_pause, 100 + 90 + 8, 10 + 45);
         self.print_bmp_at_layer2(pause_screen_resume, 100 + 8 + 90, 139 + 6);
         self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
     }
     pub fn print_restart_screen(&mut self) {
-        self.print_bmp_at_layer2(pause_screen_top, 100 + 8, 6);
+        self.print_bmp_at_layer2(pause_screen_left, 60 + 8, 20);
+        self.print_bmp_at_layer2(pause_screen_right, 90 + 100 + 20 + 102 + 8, 20);
+        self.print_bmp_at_layer2(pause_screen_game_over, 60 + 90 + 8, 10 + 45);
         self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
     }
 }

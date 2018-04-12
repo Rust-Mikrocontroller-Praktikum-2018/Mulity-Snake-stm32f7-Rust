@@ -137,7 +137,7 @@ fn main(hw: board::Hardware) -> ! {
 }
 
 fn gameloop(mut game: game::Game) -> ! {
-    //game.game_start_up();
+    game.game_start_up();
     game.draw_frame();
 
     loop {
