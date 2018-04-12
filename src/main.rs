@@ -20,8 +20,8 @@ use stm32f7::{board, embedded, ethernet, lcd, sdram, system_clock, touch, i2c};
 
 mod game;
 mod graphics;
-mod random;
 mod network;
+mod random;
 
 pub const HEIGHT: usize = 272;
 pub const WIDTH: usize = 480;
@@ -124,10 +124,10 @@ fn main(hw: board::Hardware) -> ! {
     touch::check_family_id(&mut i2c_3).unwrap();
 
     /* ETHERNET START */
-    let network;
+    let mut network;
     // Todo: random EthernetAddress: FRAGE How to use random_gen here?
     let eth_addr = smoltcp::wire::EthernetAddress([0x00, 0x08, 0xdc, 0xab, 0xcd, 0xef]);
-    let mut ethernet_device = ethernet::EthernetDevice::new(
+    let ethernet_device = ethernet::EthernetDevice::new(
         Default::default(),
         Default::default(),
         rcc,
@@ -135,14 +135,19 @@ fn main(hw: board::Hardware) -> ! {
         &mut gpio,
         ethernet_mac,
         ethernet_dma,
-        eth_addr
+        eth_addr,
     );
-    if let Err(e) = ethernet_device {
-        panic!("ethernet init failed: {:?}", e);
-    };
-    if let Ok(ether) = ethernet_device {
-        network = network::Network::new(ether, network::NetworkMode::Client);
+    // if let Err(e) = ethernet_device {
+    //     panic!("ethernet init failed: {:?}", e);
+    // };
+    // if let Ok(ether) = ethernet_device {
+    //     network = network::Network::new(ether, network::NetworkMode::Client);
+    // }
+    match ethernet_device {
+        Ok(ether_device) => network = network::Network::new(ether_device, network::NetworkMode::Client),
+        Err(e) => panic!("error parsing ethernet_device: {:?}", e),
     }
+    network.operate();
 
     /* ETHERNET END */
 
@@ -154,26 +159,26 @@ fn main(hw: board::Hardware) -> ! {
 
 fn gameloop(mut game: game::Game) -> ! {
     // Define Pictures
-    let pic1: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
-    let pic2: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
-    let pic3: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
-    game.graphics
-        .print_bmp_at_with_rotaion(pic1, 0, 0, graphics::RotDirection::r_0);
-    game.graphics.print_bmp_at_layer2(pic2, 300, 0);
+    // let pic1: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
+    // let pic2: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
+    // let pic3: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
+    // game.graphics
+    //     .print_bmp_at_with_rotaion(pic1, 0, 0, graphics::RotDirection::r_0);
+    // game.graphics.print_bmp_at_layer2(pic2, 300, 0);
 
-    let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game\n";
+    // let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game\n";
 
-    for c in welcome.chars() {
-        if c == ' ' || c == '-' || c == '!' {
-            print!("{}", c);
-            system_clock::wait(10);
-        } else {
-            game.graphics.print_bmp_at_downwards(pic2, 188, 85);
-            print!("{}", c);
-            //system_clock::wait(10);
-            game.graphics.print_bmp_at_downwards(pic3, 188, 85);
-        }
-    }
+    // for c in welcome.chars() {
+    //     if c == ' ' || c == '-' || c == '!' {
+    //         print!("{}", c);
+    //         system_clock::wait(10);
+    //     } else {
+    //         game.graphics.print_bmp_at_downwards(pic2, 188, 85);
+    //         print!("{}", c);
+    //         //system_clock::wait(10);
+    //         game.graphics.print_bmp_at_downwards(pic3, 188, 85);
+    //     }
+    // }
     // game.graphics.print_bmp_at_with_rotaion(pic, 0, 0, graphics::RotDirection::r_0);
     // game.graphics.print_bmp_at_with_rotaion(pic, 85, 0, graphics::RotDirection::r_90);
     // game.graphics.print_bmp_at_with_rotaion(pic, 170, 0, graphics::RotDirection::r_180);

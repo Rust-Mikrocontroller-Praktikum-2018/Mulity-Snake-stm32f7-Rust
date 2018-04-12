@@ -1,6 +1,7 @@
 extern crate smoltcp;
 
 use alloc::Vec;
+use alloc::borrow::ToOwned;
 use smoltcp::iface::EthernetInterface;
 // use smoltcp::phy::wait as phy_wait;
 use smoltcp::socket::{Socket, SocketSet, TcpSocket, TcpSocketBuffer};
@@ -15,9 +16,8 @@ use stm32f7::system_clock;
  */
 pub struct Network {
     ethernet_interface: EthernetInterface<'static, 'static, EthernetDevice>,
-    // sockets: SocketSet<'static, 'static, 'static>,
     network_mode: NetworkMode,
-    sockets: SocketSet<'static, 'static, 'static>, // Todo FRAGE HIER <---------------------------------------------------------
+    sockets: SocketSet<'static, 'static, 'static>,
     tcp_handle: smoltcp::socket::SocketHandle,
     tcp_active: bool,
 }
@@ -41,8 +41,8 @@ impl Network {
         // Todo: Automatically choose ip/eth (maybe check if already there, or random?)
         let local_ip_addr = Ipv4Address([192, 168, 0, 42]);
 
-        let remote_ip_addr = IpAddress::v4(192, 168, 0, 50);
-        let remote_port = 50000_u16;
+        // let remote_ip_addr = IpAddress::v4(192, 168, 0, 50);
+        // let remote_port = 50000_u16;
 
         let tcp_rx_buffer = TcpSocketBuffer::new(vec![0; ethernet::MTU]);
         let tcp_tx_buffer = TcpSocketBuffer::new(vec![0; ethernet::MTU]);
@@ -73,7 +73,7 @@ impl Network {
         }
     }
 
-    fn print_data_as_char(data: &[u8]) {
+    fn print_data_as_char(data: &Vec<u8>) {
         if data.len() > 0 {
             // data = data.split(|&b| b == b'\n').collect::<Vec<_>>().concat();
             hprint!("Data received: ");
@@ -108,16 +108,16 @@ impl Network {
             if socket.may_recv() {
                 let data = socket
                     .recv(|buffer| {
-                        //FRAGE <---------------------------------------------
-                        let mut data = buffer;
-                        Network::print_data_as_char(data);
+                        let data = buffer.to_owned();
+                        Network::print_data_as_char(&data);
                         (data.len(), data)
                     })
                     .unwrap();
                 if socket.can_send() && data.len() > 0 {
                     hprintln!("tcp:6969 send greeting");
                     // write!(socket, "ping\n").unwrap();
-                    let ping_slice = vec!['p' as u8, 'i' as u8, 'n' as u8, 'g' as u8].as_slice();
+                    let ping_slice = vec!['p' as u8, 'i' as u8, 'n' as u8, 'g' as u8];
+                    let ping_slice = ping_slice.as_slice();
                     socket.send_slice(ping_slice).unwrap();
                     hprintln!("tcp:6969 close");
                     socket.close();
@@ -131,8 +131,8 @@ impl Network {
     }
 
     fn operate_client(&mut self) {
-        let mut socket = self.sockets.get::<TcpSocket>(self.tcp_handle);
         {
+            let mut socket = self.sockets.get::<TcpSocket>(self.tcp_handle);
             if !socket.is_open() {
                 let remote_ip_addr = IpAddress::v4(192, 168, 0, 50);
                 let remote_port = 50000_u16;
@@ -152,7 +152,7 @@ impl Network {
         }
 
         {
-            // let mut socket = self.sockets.get::<TcpSocket>(self.tcp_handle); // Moved up
+            let mut socket = self.sockets.get::<TcpSocket>(self.tcp_handle);
             if socket.is_active() && !self.tcp_active {
                 hprintln!("connected");
             } else if !socket.is_active() && self.tcp_active {
@@ -165,10 +165,9 @@ impl Network {
             if socket.may_recv() {
                 /* let data =  */
                 socket
-                    .recv(|data| {
-                        // let mut data = data.to_owned();
-                        let mut data = data;
-                        Network::print_data_as_char(data);
+                    .recv(|buffer| {
+                        let data = buffer.to_owned();
+                        Network::print_data_as_char(&data);
                         (data.len(), data)
                     })
                     .unwrap();
@@ -177,7 +176,8 @@ impl Network {
                 {
                     hprintln!("send data: pong");
                     // socket.send_slice(&data[..]).unwrap();
-                    let pong_slice = vec!['p' as u8, 'o' as u8, 'n' as u8, 'g' as u8].as_slice();
+                    let pong_slice = vec!['p' as u8, 'o' as u8, 'n' as u8, 'g' as u8];
+                    let pong_slice = pong_slice.as_slice();
                     socket.send_slice(pong_slice).unwrap();
                     // write!(socket, "pong\n").unwrap();
                 }
