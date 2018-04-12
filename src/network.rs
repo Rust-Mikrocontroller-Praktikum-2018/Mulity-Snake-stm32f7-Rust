@@ -37,8 +37,7 @@ pub struct Network {
     ethernet_interface: EthernetInterface<'static, 'static, EthernetDevice>,
     network_mode: NetworkMode,
     sockets: SocketSet<'static, 'static, 'static>,
-    // tcp_handle: smoltcp::socket::SocketHandle,
-    tcp_active: bool,
+    target_endpoint: IpEndpoint,
 }
 
 /**
@@ -61,25 +60,31 @@ impl Network {
         // Todo: Automatically choose ip/eth (maybe check if already there, or random?)
         let local_ip_addr: Ipv4Address;
         let local_port: u16;
+        let target_ip_addr: Ipv4Address;
+        let target_port: u16;
         match network_mode {
             NetworkMode::Server => {
                 local_ip_addr = Ipv4Address([192, 168, 0, 24]);
                 local_port = 2424;
+                // target_ip_addr = Ipv4Address([192, 168, 0, 42]);
+                // target_port = 4242;
+                target_ip_addr = Ipv4Address([192, 168, 0, 50]);
+                target_port = 5050;
             }
             NetworkMode::Client => {
                 local_ip_addr = Ipv4Address([192, 168, 0, 42]);
-                local_port = 4242
+                local_port = 4242;
+                target_ip_addr = Ipv4Address([192, 168, 0, 24]);
+                target_port = 2424;
             }
         }
         let local_endpoint = IpEndpoint::new(IpAddress::Ipv4(local_ip_addr), local_port);
+        let target_endpoint = IpEndpoint::new(IpAddress::Ipv4(target_ip_addr), target_port);
 
         let ethernet_interface = ethernet_device.into_interface(local_ip_addr);
 
-        // let remote_ip_addr = IpAddress::v4(192, 168, 0, 50);
-        // let remote_port = 50000_u16;
-
         let udp_rx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 3], vec![0u8; 256]);
-        let udp_tx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 1], vec![0u8; 128]);
+        let udp_tx_buffer = UdpSocketBuffer::new(vec![UdpPacketMetadata::EMPTY; 1], vec![0u8; 256]);
         let mut udp_socket = UdpSocket::new(udp_rx_buffer, udp_tx_buffer);
         udp_socket.bind(local_endpoint).unwrap();
 
@@ -92,8 +97,7 @@ impl Network {
             ethernet_interface: ethernet_interface,
             network_mode: network_mode,
             sockets: sockets,
-            // tcp_handle: tcp_handle,
-            tcp_active: false,
+            target_endpoint: target_endpoint,
         }
     }
 
@@ -123,7 +127,7 @@ impl Network {
     fn hprintln_data_as_char(data: &mut Vec<u8>) {
         if data.len() > 0 {
             // data = data.split(|&b| b == b'\n').collect::<Vec<_>>().concat();
-            hprint!("Data received: ");
+            hprint!("Data: ");
             for x in data {
                 hprint!("{}", *x as char);
             }
@@ -131,7 +135,11 @@ impl Network {
         }
     }
 
-    fn operate_server(&mut self) {}
+    fn operate_server(&mut self) {
+        let data = "Hello".as_bytes();
+        self.send(data);
+    }
+
     fn operate_client(&mut self) {
         match self.recv() {
             None => {}
@@ -180,6 +188,46 @@ impl Network {
                 _ => Ok(None),
             },
             _ => Ok(None),
+        }
+    }
+
+    /**
+     * Send bytes to udp socket.
+     */
+    pub fn send(&mut self, data: &[u8]) {
+        for mut socket in self.sockets.iter_mut() {
+            Network::send_data(&mut socket, self.target_endpoint, data);
+        }
+    }
+
+    fn send_data(socket: &mut Socket, target_endpoint: IpEndpoint, data: &[u8]) {
+        match socket {
+            &mut Socket::Udp(ref mut socket) => {
+                let mut data_copy = data.to_owned();
+                Network::hprintln_data_as_char(&mut data_copy);
+                match socket.send_slice(data, target_endpoint) {
+                    Err(e) => hprint!("Err: {:?}", e),
+                    Ok(_) => (),
+                }
+                // Did not work -> Network was alway exhausted.
+                /*
+                let mut could_send = false;
+                let mut counter: usize = 0;
+                let retrys = 10; // try 10 times before giving up.
+                while (!could_send) && (counter < retrys) {
+                    match socket.send_slice(data, target_endpoint) {
+                        Err(e) => {
+                            counter += 1;
+                            if counter >= retrys {
+                                println!("Error: {:?}!", e);
+                            }
+                        },
+                        Ok(_) => could_send = true,
+                    }
+                }
+                */
+            }
+            _ => {}
         }
     }
 }

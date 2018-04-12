@@ -126,8 +126,8 @@ fn main(hw: board::Hardware) -> ! {
     /* ETHERNET START */
     let mut network;
     // Todo: How to choose NetworkMode?
-    let network_mode = network::NetworkMode::Client;
-    // let network_mode = network::NetworkMode::Server;
+    // let network_mode = network::NetworkMode::Client;
+    let network_mode = network::NetworkMode::Server;
     // Todo: random EthernetAddress: FRAGE How to use random_gen here?
     let eth_addr = network::Network::get_ethernet_addr(network_mode);
     let ethernet_device = ethernet::EthernetDevice::new(
@@ -159,7 +159,8 @@ fn gameloop(mut game: game::Game, mut network: network::Network) -> ! {
         // game.move_snake();
         // game.snake_bite();
         // game.draw_game();
-        system_clock::wait(100);
+        println!("Test<3");
+        system_clock::wait(1000);
         network.operate();
     }
 }
