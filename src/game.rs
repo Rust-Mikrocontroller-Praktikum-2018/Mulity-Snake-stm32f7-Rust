@@ -568,8 +568,10 @@ impl Game {
     }
 
     fn restart_game(&mut self) {
+        self.graphics.background_blink();
+
         self.graphics.print_restart_screen();
-        println!("     score: {}", self.apple_counter);
+        println!("   score: {}", self.apple_counter);
         self.apple_counter = 0;
         let mut pause = true;
         let mut new_game = false;
@@ -617,11 +619,11 @@ impl Game {
             graphics::RotDirection::r_0,
         );
 
-        let welcome = "Welcome to Mulity-Snake! Touch Screen to start the Game";
+        let welcome = "Welcome to Mulity-Snake! Touch screen to start the game";
 
         for c in welcome.chars() {
             if c == ' ' || c == '-' || c == '!' {
-                print!("{}", c);
+                println!("{}", c);
             // system_clock::wait(10);
             } else {
                 self.graphics.print_bmp_at_downwards(
