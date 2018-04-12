@@ -11,7 +11,7 @@
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "stutil",
-            // "device": "STM32F746G-DISCO",
+            "device": "STM32F746G-DISCO",
             // "v1": true
         }
     ]
