@@ -5,6 +5,8 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // Read:
+            // https://marcelball.ca/projects/cortex-debug/
             "name": "Cortex Debug (st-util)",
             "cwd": "${workspaceRoot}",
             "executable": "./target/stm32f7/debug/multi_snake_stm32f7_rust",

@@ -133,25 +133,40 @@ impl Network {
     }
 
     fn operate_server(&mut self) {}
-
     fn operate_client(&mut self) {
+        match self.recv() {
+            None => {}
+            Some(x) => {
+                let mut x_copy = x.to_owned();
+                Network::print_data_as_char(&mut x_copy);
+            }
+        }
+    }
+
+    /**
+     * Receive bytes from udp socket.
+     */
+    pub fn recv(&mut self) -> Option<Vec<u8>> {
         let timestamp = Instant::from_millis(system_clock::ticks() as i64);
         match self.ethernet_interface.poll(&mut self.sockets, timestamp) {
-            Err(::smoltcp::Error::Exhausted) => return,
-            Err(::smoltcp::Error::Unrecognized) => {}
-            Err(e) => println!("Network error: {:?}", e),
-            Ok(socket_changed) => if socket_changed {
-                for mut socket in self.sockets.iter_mut() {
-                    let poll = Network::poll_socket(&mut socket).expect("socket poll failed");
-                    match poll {
-                        None => (),
-                        Some(x) => {
-                            let mut poll_copy = x.to_owned();
-                            Network::print_data_as_char(&mut poll_copy);
-                        }
+            Err(::smoltcp::Error::Exhausted) => None,
+            Err(::smoltcp::Error::Unrecognized) => None,
+            Err(e) => {
+                println!("Network error: {:?}", e);
+                None
+            }
+            Ok(socket_changed) => {
+                if socket_changed {
+                    for mut socket in self.sockets.iter_mut() {
+                        return Network::poll_socket(&mut socket).expect("socket poll failed");
+                        // return Network::poll_socket(&mut socket).unwrap()
                     }
+                } else {
+                    return None;
                 }
-            },
+                None
+            }
+            _ => None,
         }
     }
 
