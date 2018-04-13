@@ -555,6 +555,8 @@ impl Game {
                 self.graphics.layer_1.clear();
                 break;
             }
+            system_clock::wait(20);
+
         }
         if new_game {
             self.reset();
@@ -617,8 +619,8 @@ impl Game {
 
         for c in welcome.chars() {
             if c == ' ' || c == '-' || c == '!' {
-                println!("{}", c);
-            // system_clock::wait(10);
+                print!("{}", c);
+            system_clock::wait(60);
             } else {
                 self.graphics.print_bmp_at_downwards(
                     self::graphics::WELCOME_SCREEN_OPEN_MOUTH,
@@ -627,7 +629,7 @@ impl Game {
                 );
 
                 print!("{}", c);
-                system_clock::wait(10);
+                system_clock::wait(60);
                 self.graphics.print_bmp_at_downwards(
                     self::graphics::WELCOME_SCREEN_CLOSED_MOUTH,
                     188,
@@ -635,6 +637,7 @@ impl Game {
                 );
             }
         }
+        println!("");
         loop {
             let touches = self.get_touches();
             let mut pause = true;
@@ -643,6 +646,7 @@ impl Game {
                 self.graphics.layer_2.clear();
                 break;
             }
+            system_clock::wait(20);
         }
     }
     pub fn reset(&mut self) {
