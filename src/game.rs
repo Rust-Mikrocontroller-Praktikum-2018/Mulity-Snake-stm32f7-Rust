@@ -76,7 +76,7 @@ impl Game {
             apple_position: (1, 10),
             apple_counter: 0,
         };
-        return_game.grid[25][10] = Tile::SnakeHead(Direction::right);
+        return_game.grid[24][10] = Tile::SnakeHead(Direction::right);
         return_game
     }
 
