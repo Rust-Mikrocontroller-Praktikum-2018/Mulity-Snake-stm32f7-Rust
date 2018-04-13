@@ -1,10 +1,4 @@
-#![no_std]
-#![no_main]
-#![feature(compiler_builtins_lib)]
-#![cfg_attr(feature = "cargo-clippy", warn(clippy))]
-
 extern crate arrayvec;
-extern crate compiler_builtins;
 extern crate r0;
 extern crate stm32f7_discovery as stm32f7; // initialization routines for .data and .bss
 
@@ -146,22 +140,22 @@ impl Game {
         // Bmp
         let direction = &self.grid[self.snake_head_position.0][self.snake_head_position.1];
         let mut apple_offset = self.apple_position;
-        let mut rot = self::graphics::RotDirection::r_0;
+        let mut rot = self::graphics::RotDirection::R0;
         match direction {
             &Tile::SnakeHead(Direction::left) => {
-                rot = self::graphics::RotDirection::r_0;
+                rot = self::graphics::RotDirection::R0;
                 apple_offset = (self.apple_position.0 + 1, self.apple_position.1)
             }
             &Tile::SnakeHead(Direction::up) => {
-                rot = self::graphics::RotDirection::r_90;
+                rot = self::graphics::RotDirection::R90;
                 apple_offset = (self.apple_position.0, self.apple_position.1 + 1)
             }
             &Tile::SnakeHead(Direction::right) => {
-                rot = self::graphics::RotDirection::r_180;
+                rot = self::graphics::RotDirection::R180;
                 apple_offset = (self.apple_position.0 - 1, self.apple_position.1)
             }
             &Tile::SnakeHead(Direction::down) => {
-                rot = self::graphics::RotDirection::r_270;
+                rot = self::graphics::RotDirection::R270;
                 apple_offset = (self.apple_position.0, self.apple_position.1 - 1)
             }
             _ => {}
@@ -170,14 +164,14 @@ impl Game {
 
         if self.snake_head_position == apple_offset {
             self.graphics.print_bmp_at_with_rotaion(
-                graphics::snake_mouth_open,
+                graphics::SNAKE_MOUTH_OPEN,
                 (self.snake_head_position.0 * GRID_BLOCK_SIZE) as u32,
                 (self.snake_head_position.1 * GRID_BLOCK_SIZE) as u32,
                 rot,
             );
         } else {
             self.graphics.print_bmp_at_with_rotaion(
-                graphics::snake_mouth_closed,
+                graphics::SNAKE_MOUTH_CLOSED,
                 (self.snake_head_position.0 * GRID_BLOCK_SIZE) as u32,
                 (self.snake_head_position.1 * GRID_BLOCK_SIZE) as u32,
                 rot,
@@ -242,10 +236,10 @@ impl Game {
         // draw apple (bmp of apple)
         // Bmp
         self.graphics.print_bmp_at_with_rotaion(
-            graphics::apple_bmp,
+            graphics::APPLE_BMP,
             (self.apple_position.0 * GRID_BLOCK_SIZE) as u32,
             (self.apple_position.1 * GRID_BLOCK_SIZE) as u32,
-            self::graphics::RotDirection::r_0,
+            self::graphics::RotDirection::R0,
         )
 
         // Quadrat
@@ -613,10 +607,10 @@ impl Game {
     }
     pub fn game_start_up(&mut self) {
         self.graphics.print_bmp_at_with_rotaion(
-            self::graphics::welcome_screen_base,
+            self::graphics::WELCOME_SCREEN_BASE,
             0,
             0,
-            graphics::RotDirection::r_0,
+            graphics::RotDirection::R0,
         );
 
         let welcome = "Welcome to Mulity-Snake! Touch screen to start the game";
@@ -627,7 +621,7 @@ impl Game {
             // system_clock::wait(10);
             } else {
                 self.graphics.print_bmp_at_downwards(
-                    self::graphics::welcome_screen_open_mouth,
+                    self::graphics::WELCOME_SCREEN_OPEN_MOUTH,
                     188,
                     85,
                 );
@@ -635,7 +629,7 @@ impl Game {
                 print!("{}", c);
                 system_clock::wait(10);
                 self.graphics.print_bmp_at_downwards(
-                    self::graphics::welcome_screen_closed_mouth,
+                    self::graphics::WELCOME_SCREEN_CLOSED_MOUTH,
                     188,
                     85,
                 );

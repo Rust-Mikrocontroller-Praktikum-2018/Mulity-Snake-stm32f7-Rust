@@ -7,26 +7,26 @@ pub struct Graphics {
 }
 
 pub enum RotDirection {
-    r_0,
-    r_90,
-    r_180,
-    r_270,
+    R0,
+    R90,
+    R180,
+    R270,
 }
 
-pub const pause_screen_right: &[u8] = include_bytes!("../assets/Pause_screen_snake_left.bmp");
-pub const pause_screen_left: &[u8] = include_bytes!("../assets/Pause_screen_snake_right.bmp");
-pub const pause_screen_game_over: &[u8] = include_bytes!("../assets/Pause_screen_game_over.bmp");
-pub const pause_screen_pause: &[u8] = include_bytes!("../assets/Pause_screen_pause.bmp");
-pub const pause_screen_resume: &[u8] = include_bytes!("../assets/Pause_screen_resume.bmp");
-pub const pause_screen_new_game: &[u8] = include_bytes!("../assets/Pause_screen_New_game.bmp");
-pub const welcome_screen_base: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
-pub const welcome_screen_open_mouth: &[u8] =
+pub const PAUSE_SCREEN_RIGHT: &[u8] = include_bytes!("../assets/Pause_screen_snake_left.bmp");
+pub const PAUSE_SCREEN_LEFT: &[u8] = include_bytes!("../assets/Pause_screen_snake_right.bmp");
+pub const PAUSE_SCREEN_GAME_OVER: &[u8] = include_bytes!("../assets/Pause_screen_game_over.bmp");
+pub const PAUSE_SCREEN_PAUSE: &[u8] = include_bytes!("../assets/Pause_screen_pause.bmp");
+pub const PAUSE_SCREEN_RESUME: &[u8] = include_bytes!("../assets/Pause_screen_resume.bmp");
+pub const PAUSE_SCREEN_NEW_GAME: &[u8] = include_bytes!("../assets/Pause_screen_New_game.bmp");
+pub const WELCOME_SCREEN_BASE: &[u8] = include_bytes!("../assets/Welcom_screen/Snake_base2.bmp");
+pub const WELCOME_SCREEN_OPEN_MOUTH: &[u8] =
     include_bytes!("../assets/Welcom_screen/Snake_mouth_open.bmp");
-pub const welcome_screen_closed_mouth: &[u8] =
+pub const WELCOME_SCREEN_CLOSED_MOUTH: &[u8] =
     include_bytes!("../assets/Welcom_screen/Snake_mouth_shut.bmp");
-pub const apple_bmp: &[u8] = include_bytes!("../assets/apple.bmp");
-pub const snake_mouth_closed: &[u8] = include_bytes!("../assets/snake_head_closed.bmp");
-pub const snake_mouth_open: &[u8] = include_bytes!("../assets/snake_head_opened.bmp");
+pub const APPLE_BMP: &[u8] = include_bytes!("../assets/apple.bmp");
+pub const SNAKE_MOUTH_CLOSED: &[u8] = include_bytes!("../assets/snake_head_closed.bmp");
+pub const SNAKE_MOUTH_OPEN: &[u8] = include_bytes!("../assets/snake_head_opened.bmp");
 
 impl Graphics {
     /**
@@ -106,23 +106,23 @@ impl Graphics {
         let pic_length: u32 = pic.len() as u32;
 
         match rot {
-            RotDirection::r_0 => {
+            RotDirection::R0 => {
                 at_y = y + height - 1;
             }
-            RotDirection::r_90 => {
+            RotDirection::R90 => {
                 at_y = y + rot_height - 1;
             }
-            RotDirection::r_180 => {
+            RotDirection::R180 => {
                 at_y = y + height - 1;
                 bytenr = pic_length - 1;
             }
-            RotDirection::r_270 => {
+            RotDirection::R270 => {
                 at_y = y + rot_height - 1;
             }
         }
 
         match rot {
-            RotDirection::r_0 => for i in 0..height {
+            RotDirection::R0 => for i in 0..height {
                 for j in 0..width {
                     if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
                         && pic[(bytenr) as usize] > 245
@@ -145,7 +145,7 @@ impl Graphics {
                     }
                 }
             },
-            RotDirection::r_90 => for i in 0..rot_height {
+            RotDirection::R90 => for i in 0..rot_height {
                 bytenr = pixels_start + width * 3 - 3 * (i + 1);
                 for j in 0..rot_width {
                     if pic[(bytenr + 2) as usize] > 245 && pic[(bytenr + 1) as usize] > 245
@@ -166,7 +166,7 @@ impl Graphics {
                     bytenr = bytenr + width * 3 + pixel_rest;
                 }
             },
-            RotDirection::r_180 => for i in 0..height {
+            RotDirection::R180 => for i in 0..height {
                 bytenr = bytenr - pixel_rest;
                 for j in 0..width {
                     if pic[(bytenr - 2) as usize] > 245 && pic[(bytenr - 1) as usize] > 245
@@ -187,7 +187,7 @@ impl Graphics {
                     bytenr = bytenr - 3;
                 }
             },
-            RotDirection::r_270 => for i in 0..rot_height {
+            RotDirection::R270 => for i in 0..rot_height {
                 bytenr = pixels_start + (height - 1) * (3 * width + pixel_rest) + i * 3;
 
                 for j in 0..rot_width {
@@ -278,16 +278,16 @@ impl Graphics {
         }
     }
     pub fn print_pause_screen(&mut self) {
-        self.print_bmp_at_layer2(pause_screen_left, 90 + 8, 20);
-        self.print_bmp_at_layer2(pause_screen_right, 90 + 100 + 102 + 8, 20);
-        self.print_bmp_at_layer2(pause_screen_pause, 100 + 90 + 8, 10 + 45);
-        self.print_bmp_at_layer2(pause_screen_resume, 100 + 8 + 90, 139 + 6);
-        self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_LEFT, 90 + 8, 20);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_RIGHT, 90 + 100 + 102 + 8, 20);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_PAUSE, 100 + 90 + 8, 10 + 45);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_RESUME, 100 + 8 + 90, 139 + 6);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_NEW_GAME, 100 + 8 + 78, 192 + 6);
     }
     pub fn print_restart_screen(&mut self) {
-        self.print_bmp_at_layer2(pause_screen_left, 60 + 8, 20);
-        self.print_bmp_at_layer2(pause_screen_right, 90 + 100 + 20 + 102 + 8, 20);
-        self.print_bmp_at_layer2(pause_screen_game_over, 60 + 90 + 8, 10 + 45);
-        self.print_bmp_at_layer2(pause_screen_new_game, 100 + 8 + 78, 192 + 6);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_LEFT, 60 + 8, 20);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_RIGHT, 90 + 100 + 20 + 102 + 8, 20);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_GAME_OVER, 60 + 90 + 8, 10 + 45);
+        self.print_bmp_at_layer2(PAUSE_SCREEN_NEW_GAME, 100 + 8 + 78, 192 + 6);
     }
 }
