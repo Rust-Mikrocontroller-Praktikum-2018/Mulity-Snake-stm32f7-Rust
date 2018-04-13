@@ -17,7 +17,7 @@ extern crate r0;
 extern crate smoltcp;
 
 #[macro_use]
-use stm32f7::{board, embedded, ethernet, exceptions, lcd, sdram, system_clock, touch, i2c};
+use stm32f7::{board, embedded, lcd, sdram, system_clock, touch, i2c};
 
 mod game;
 mod graphics;
@@ -78,7 +78,7 @@ fn main(hw: board::Hardware) -> ! {
         ..
     } = hw;
 
-    use embedded::interfaces::gpio::{self, Gpio};
+    use embedded::interfaces::gpio::{Gpio};
     let mut gpio = Gpio::new(
         gpio_a,
         gpio_b,

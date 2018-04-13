@@ -1,10 +1,17 @@
 # Multi-Snake-stm32f7-Rust
 Multiplayer Snake for stm32f7 written in Rust
 
+![Demo1](Mulity_Demo_1.gif "Demo gif 1")
+
+![Demo2](Mulity_Demo_2.gif "Demo gif 2")
+
+![Demo3](Mulity_Demo_3.gif "Demo gif 3")
+
+
+## Build + Run
 **PLS**:  
 rename either `.gdbinitv7` or `.gdbinitv8` to `.gdbinit` depending on your gdb version.
 
-## Build + Run
 On Linux/Mac:
 
 ```bash

@@ -1,11 +1,3 @@
-#![no_std]
-#![no_main]
-#![feature(compiler_builtins_lib)]
-#![feature(asm)]
-#![cfg_attr(feature = "cargo-clippy", warn(clippy))]
-#![feature(alloc)]
-
-extern crate compiler_builtins;
 #[macro_use]
 extern crate stm32f7_discovery as stm32f7; // initialization routines for .data and .bss
 
